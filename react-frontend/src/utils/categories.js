@@ -1,47 +1,82 @@
-// Merchant Category Code (MCC) -> friendly label/icon, for grouping transactions into
-// spending categories. Falls back gracefully for codes outside this sample set.
-const MCC_MAP = {
-  '4900': { label: 'Utilities', icon: '💡' },
-  '4899': { label: 'Utilities', icon: '💡' },
-  '1711': { label: 'Housing & Utilities', icon: '🏠' },
-  '5411': { label: 'Groceries', icon: '🛒' },
-  '5412': { label: 'Groceries', icon: '🛒' },
-  '5812': { label: 'Dining', icon: '🍽️' },
-  '5813': { label: 'Dining', icon: '🍽️' },
-  '5814': { label: 'Dining', icon: '🍽️' },
-  '5541': { label: 'Fuel & Transport', icon: '⛽' },
-  '4121': { label: 'Fuel & Transport', icon: '🚕' },
-  '4111': { label: 'Fuel & Transport', icon: '🚆' },
-  '5732': { label: 'Electronics', icon: '🔌' },
-  '5651': { label: 'Shopping', icon: '🛍️' },
-  '5311': { label: 'Shopping', icon: '🛍️' },
-  '5945': { label: 'Entertainment', icon: '🎮' },
-  '7832': { label: 'Entertainment', icon: '🎬' },
-  '5815': { label: 'Subscriptions', icon: '📺' },
-  '4899_2': { label: 'Subscriptions', icon: '📺' },
-  '8011': { label: 'Health', icon: '🏥' },
-  '8021': { label: 'Health', icon: '🏥' },
-  '8099': { label: 'Health', icon: '🏥' },
-  '5874': { label: 'Bills & Services', icon: '🧾' },
-  '6300': { label: 'Insurance', icon: '🛡️' },
+// Mirrors python-backend/app/mcc_categories.py (canonical MCC -> category mapping)
+// and the category names in python-backend/app/categorizer.py, so a transaction
+// shows the same category label whether it came from the backend's AI/DB-driven
+// analysis or was categorized client-side from a live core-api response.
+const MCC_CATEGORY_MAP = {
+  '5411': 'Groceries',
+  '5412': 'Groceries',
+  '5422': 'Groceries',
+  '5300': 'Groceries',
+  '5812': 'Dining & Restaurants',
+  '5813': 'Dining & Restaurants',
+  '5814': 'Dining & Restaurants',
+  '4111': 'Transport',
+  '4112': 'Transport',
+  '4121': 'Transport',
+  '5541': 'Transport',
+  '5542': 'Transport',
+  '1711': 'Utilities & Bills',
+  '4899': 'Utilities & Bills',
+  '4900': 'Utilities & Bills',
+  '5874': 'Utilities & Bills',
+  '5311': 'Shopping',
+  '5651': 'Shopping',
+  '5732': 'Shopping',
+  '5945': 'Entertainment & Leisure',
+  '7832': 'Entertainment & Leisure',
+  '5815': 'Subscriptions',
+  '7997': 'Health & Fitness',
+  '8011': 'Health & Fitness',
+  '8021': 'Health & Fitness',
+  '8099': 'Health & Fitness',
+  '4511': 'Travel',
+  '7011': 'Travel',
+  '6300': 'Insurance',
+  '6010': 'Cash Withdrawal',
+  '6011': 'Cash Withdrawal',
+}
+
+const CATEGORY_ICON = {
+  Groceries: '🛒',
+  'Dining & Restaurants': '🍽️',
+  Transport: '🚗',
+  'Utilities & Bills': '💡',
+  'Rent & Mortgage': '🏠',
+  Shopping: '🛍️',
+  'Entertainment & Leisure': '🎬',
+  Subscriptions: '📺',
+  'Health & Fitness': '🏥',
+  Travel: '✈️',
+  Insurance: '🛡️',
+  Education: '🎓',
+  'Cash Withdrawal': '💵',
+  'Fees & Charges': '💳',
+  'Other Expense': '🧾',
+  Salary: '💰',
+  'Interest & Investment Income': '📈',
+  Refunds: '↩️',
+  'Transfers In': '🔁',
+  'Other Income': '💷',
+  Transfers: '🔁',
 }
 
 const TRANSFER_CODES = new Set(['IssuedCreditTransfer', 'ReceivedCreditTransfer', 'Transfer'])
 
-export function mccLabel(code) {
-  if (!code) return 'Uncategorised'
-  if (MCC_MAP[code]) return MCC_MAP[code].label
-  return `Other (${code})`
+export function iconForCategory(category) {
+  return CATEGORY_ICON[category] || '🧾'
 }
 
 export function categorizeTransaction(txn) {
   const bankCode = txn.BankTransactionCode?.Code
   if (bankCode && TRANSFER_CODES.has(bankCode) && !txn.MerchantDetails?.MerchantName) {
-    return { label: 'Transfers', icon: '🔁' }
+    return { label: 'Transfers', icon: iconForCategory('Transfers') }
   }
 
+  const isDebit = txn.CreditDebitIndicator === 'Debit'
   const mcc = txn.MerchantDetails?.MerchantCategoryCode
-  if (mcc && MCC_MAP[mcc]) return MCC_MAP[mcc]
-  if (mcc) return { label: `Other (${mcc})`, icon: '🧾' }
-  return { label: 'Other', icon: '🧾' }
+  const category = mcc && MCC_CATEGORY_MAP[mcc]
+  if (category) return { label: category, icon: iconForCategory(category) }
+
+  const fallback = isDebit ? 'Other Expense' : 'Other Income'
+  return { label: fallback, icon: iconForCategory(fallback) }
 }

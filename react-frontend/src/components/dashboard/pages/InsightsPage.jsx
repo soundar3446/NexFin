@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { getFinancialHealth, getMonthlySpending, syncAccounts } from '../../../api'
-import { mccLabel } from '../../../utils/categories'
 import { formatAmount, monthLabel } from '../../../utils/format'
 import CategoryBarChart from '../shared/charts/CategoryBarChart'
 import IncomeExpenseChart from '../shared/charts/IncomeExpenseChart'
@@ -128,7 +127,7 @@ function InsightsPage() {
         ) : (
           <CategoryBarChart
             data={current.by_category.map((c) => ({
-              label: mccLabel(c.merchant_category_code),
+              label: c.category,
               total: c.total,
             }))}
             currency={currency}
