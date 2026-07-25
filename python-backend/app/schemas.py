@@ -31,3 +31,8 @@ class TokenResponse(BaseModel):
     refresh_expires_in: int | None = None
     token_type: str | None = None
     scope: str | None = None
+
+
+class AcknowledgementStatus(BaseModel):
+    acknowledged: bool
+    acknowledged_at: datetime | None = None
