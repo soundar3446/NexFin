@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.hf_client import HfUnavailable, chat_complete
+from app.mcc_categories import category_for_mcc
 
 EXPENSE_CATEGORIES = [
     "Groceries",
@@ -60,28 +61,6 @@ _INCOME_KEYWORD_RULES: list[tuple[list[str], str]] = [
     (["transfer from", "faster payment", "standing order in"], "Transfers In"),
 ]
 
-_MCC_RULES: dict[str, str] = {
-    "5411": "Groceries",
-    "5412": "Groceries",
-    "5812": "Dining & Restaurants",
-    "5814": "Dining & Restaurants",
-    "4111": "Transport",
-    "4121": "Transport",
-    "5541": "Transport",
-    "5542": "Transport",
-    "4900": "Utilities & Bills",
-    "5300": "Groceries",
-    "5732": "Shopping",
-    "5651": "Shopping",
-    "7011": "Travel",
-    "4511": "Travel",
-    "7997": "Health & Fitness",
-    "8011": "Health & Fitness",
-    "6011": "Cash Withdrawal",
-    "6010": "Cash Withdrawal",
-}
-
-
 def _contains_keyword(text: str, keyword: str) -> bool:
     return re.search(rf"\b{re.escape(keyword.strip())}\b", text) is not None
 
@@ -94,8 +73,10 @@ def _fallback_category(txn: models.Transaction) -> str:
         if any(_contains_keyword(text, keyword) for keyword in keywords):
             return category
 
-    if txn.merchant_category_code and txn.merchant_category_code in _MCC_RULES:
-        return _MCC_RULES[txn.merchant_category_code]
+    if txn.credit_debit_indicator == "Debit":
+        mcc_category = category_for_mcc(txn.merchant_category_code)
+        if mcc_category:
+            return mcc_category
 
     return "Other Expense" if txn.credit_debit_indicator == "Debit" else "Other Income"
 

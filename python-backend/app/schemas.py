@@ -44,7 +44,7 @@ class SyncResult(BaseModel):
 
 
 class MonthlyCategoryBreakdown(BaseModel):
-    merchant_category_code: str | None
+    category: str
     total: float
 
 

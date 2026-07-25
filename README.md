@@ -37,7 +37,7 @@ npm run dev
 
 ## Endpoints
 
-Interactive docs (Swagger UI) are also available at `/docs` once the backend is running. A Postman collection covering all of these lives at `python-backend/NexFin-Backend.postman_collection.json`. For how each endpoint works internally and the service layer underneath it, see [python-backend/WIKI.md](python-backend/WIKI.md).
+Interactive docs (Swagger UI) are also available at `/docs` once the backend is running. A Postman collection covering all of these lives at `python-backend/NexFin-Backend.postman_collection.json`. For the logic behind each endpoint — what's calculated and how, no code — see [ENDPOINTS.md](ENDPOINTS.md). For how each endpoint works internally and the service layer underneath it, see [python-backend/WIKI.md](python-backend/WIKI.md).
 
 | Method | Path | Auth | Description |
 |---|---|---|---|

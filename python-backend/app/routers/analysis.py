@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.auth_utils import get_current_user_sub
 from app.database import get_db
+from app.mcc_categories import category_for_mcc
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
@@ -53,7 +54,8 @@ def _compute_monthly_summaries(db: Session, user_sub: str) -> list[schemas.Month
             account_bucket["total_spend"] += amount
             if is_pending:
                 bucket["pending_spend"] += amount
-            bucket["by_category"][txn.merchant_category_code or "Uncategorised"] += amount
+            category = category_for_mcc(txn.merchant_category_code) or "Uncategorised"
+            bucket["by_category"][category] += amount
             bucket["by_merchant"][txn.merchant_name or "Unknown"] += amount
         else:
             bucket["total_income"] += amount
@@ -73,8 +75,8 @@ def _compute_monthly_summaries(db: Session, user_sub: str) -> list[schemas.Month
                 pending_income=round(bucket["pending_income"], 2),
                 transaction_count=bucket["transaction_count"],
                 by_category=[
-                    schemas.MonthlyCategoryBreakdown(merchant_category_code=code, total=round(total, 2))
-                    for code, total in sorted(bucket["by_category"].items(), key=lambda kv: -kv[1])
+                    schemas.MonthlyCategoryBreakdown(category=category, total=round(total, 2))
+                    for category, total in sorted(bucket["by_category"].items(), key=lambda kv: -kv[1])
                 ],
                 by_merchant=[
                     schemas.MonthlyMerchantBreakdown(merchant_name=name, total=round(total, 2))
@@ -181,7 +183,7 @@ def financial_health(
                         severity="info",
                         message=(
                             f"{round(share * 100)}% of spending this month was in one category "
-                            f"({top_category.merchant_category_code})."
+                            f"({top_category.category})."
                         ),
                     )
                 )
