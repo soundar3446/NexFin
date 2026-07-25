@@ -915,6 +915,89 @@ body {
   margin: 0.2rem 0 0;
 }
 
+.account-description {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0 0 0.5rem;
+}
+
+.account-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.account-holder {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-dot {
+  font-size: 0.68rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.status-dot::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.status-dot.status-enabled::before {
+  background: var(--viz-good);
+}
+
+.status-dot.status-disabled::before,
+.status-dot.status-blocked::before {
+  background: var(--viz-critical);
+}
+
+.account-opened {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin: 0.35rem 0 0;
+}
+
+/* Account details list */
+.detail-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.detail-row dt {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.detail-row dd {
+  margin: 0;
+  font-weight: 500;
+  text-align: right;
+}
+
 /* Transactions */
 .transactions-feed-list {
   list-style: none;

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { formatAmount } from '../../../utils/format'
+import { formatAmount, formatDate } from '../../../utils/format'
 
 const NICKNAME_ICON = {
   Bills: '🧾',
@@ -12,6 +12,7 @@ const NICKNAME_ICON = {
 function AccountCard({ account }) {
   const balance = account.balance
   const icon = NICKNAME_ICON[account.Nickname] || '💰'
+  const holderName = account.Account?.[0]?.Name
 
   return (
     <Link to={`/accounts/${account.AccountId}`} className="account-card-link">
@@ -23,6 +24,9 @@ function AccountCard({ account }) {
           </span>
         </div>
         <h3>{account.Nickname || account.Description || 'Account'}</h3>
+        {account.Description && account.Description !== account.Nickname && (
+          <p className="account-description">{account.Description}</p>
+        )}
         <p className="account-type">
           {account.AccountTypeCode} &middot; {account.Currency}
         </p>
@@ -33,6 +37,13 @@ function AccountCard({ account }) {
           <p className="account-available">
             {formatAmount(balance.CreditLine[0].Amount.Amount, balance.CreditLine[0].Amount.Currency)} available
           </p>
+        )}
+        <div className="account-card-footer">
+          {holderName && <span className="account-holder">{holderName}</span>}
+          {account.Status && <span className={`status-dot status-${account.Status.toLowerCase()}`}>{account.Status}</span>}
+        </div>
+        {account.OpeningDate && (
+          <p className="account-opened">Opened {formatDate(account.OpeningDate)}</p>
         )}
       </div>
     </Link>

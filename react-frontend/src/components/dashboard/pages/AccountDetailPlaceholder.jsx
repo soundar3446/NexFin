@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useDashboardData } from '../../../context/DashboardDataContext'
 import { EmptyState, LoadingState } from '../shared/States'
 import TransactionRow from '../shared/TransactionRow'
-import { formatAmount } from '../../../utils/format'
+import { formatAmount, formatDate } from '../../../utils/format'
 
 // Placeholder for the per-account dashboard (overview/transactions/insights/details
 // sub-pages) planned as the next phase. Shows enough real data now so the link
@@ -23,6 +23,7 @@ function AccountDetailPlaceholder() {
   }
 
   const txns = getAccountTransactions(accountId).slice(0, 10)
+  const holderName = account.Account?.[0]?.Name
 
   return (
     <div className="page">
@@ -43,6 +44,38 @@ function AccountDetailPlaceholder() {
             {account.balance ? formatAmount(account.balance.Amount.Amount, account.balance.Amount.Currency) : '—'}
           </span>
         </div>
+      </section>
+
+      <section className="page-section">
+        <div className="section-header">
+          <h2>Account details</h2>
+        </div>
+        <dl className="detail-list">
+          {holderName && (
+            <div className="detail-row">
+              <dt>Held by</dt>
+              <dd>{holderName}</dd>
+            </div>
+          )}
+          {account.Description && (
+            <div className="detail-row">
+              <dt>Description</dt>
+              <dd>{account.Description}</dd>
+            </div>
+          )}
+          {account.OpeningDate && (
+            <div className="detail-row">
+              <dt>Opened</dt>
+              <dd>{formatDate(account.OpeningDate)}</dd>
+            </div>
+          )}
+          {account.Status && (
+            <div className="detail-row">
+              <dt>Status</dt>
+              <dd>{account.Status}</dd>
+            </div>
+          )}
+        </dl>
       </section>
 
       <section className="page-section">
