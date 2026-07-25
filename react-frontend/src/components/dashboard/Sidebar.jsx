@@ -7,12 +7,11 @@ const NAV_ITEMS = [
   { to: '/insights', label: 'Insights', icon: '📊' },
 ]
 
-function Sidebar({ username, onLogout }) {
+function Sidebar() {
   return (
     <aside className="app-sidebar">
       <div className="app-sidebar-brand">
         <span className="login-logo">N</span>
-        <span className="login-logo-name">NexFin</span>
       </div>
 
       <nav className="app-nav">
@@ -22,19 +21,13 @@ function Sidebar({ username, onLogout }) {
             to={item.to}
             end={item.end}
             className={({ isActive }) => `app-nav-link${isActive ? ' active' : ''}`}
+            title={item.label}
           >
             <span className="app-nav-icon">{item.icon}</span>
             {item.label}
           </NavLink>
         ))}
       </nav>
-
-      <div className="app-sidebar-footer">
-        {username && <p className="app-sidebar-user" title={username}>{username}</p>}
-        <button type="button" className="app-logout-btn" onClick={onLogout}>
-          Log out
-        </button>
-      </div>
     </aside>
   )
 }

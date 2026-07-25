@@ -37,7 +37,6 @@ function OverviewPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <h1>Overview</h1>
         <p>Everything across your {accounts.length} accounts, at a glance.</p>
       </header>
 

@@ -30,7 +30,6 @@ function AccountDetailPlaceholder() {
         <Link to="/accounts" className="link-btn">
           &larr; All accounts
         </Link>
-        <h1>{account.Nickname || 'Account'}</h1>
         <p>
           {account.AccountTypeCode} &middot; {account.Currency} &middot;{' '}
           {account.InternationalAccount ? 'International' : 'Domestic'}

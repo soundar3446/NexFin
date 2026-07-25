@@ -44,9 +44,6 @@ function InsightsPage() {
   if (!months || months.length === 0) {
     return (
       <div className="page">
-        <header className="page-header">
-          <h1>Insights</h1>
-        </header>
         <EmptyState
           icon="📊"
           title="Not enough activity yet"
@@ -64,10 +61,7 @@ function InsightsPage() {
   return (
     <div className="page">
       <header className="page-header page-header-row">
-        <div>
-          <h1>Insights</h1>
-          <p>Spending analysis from your synced transaction history.</p>
-        </div>
+        <p>Spending analysis from your synced transaction history.</p>
         <button type="button" className="link-btn refresh-btn" onClick={load}>
           ⟳ Refresh
         </button>

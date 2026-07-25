@@ -49,7 +49,6 @@ function TransactionsPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <h1>Transactions</h1>
         <p>
           {filtered.length} of {transactions.length} transactions across all accounts.
         </p>

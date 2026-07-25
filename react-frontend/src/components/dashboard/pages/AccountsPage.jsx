@@ -22,9 +22,6 @@ function AccountsPage() {
   if (accounts.length === 0) {
     return (
       <div className="page">
-        <header className="page-header">
-          <h1>Accounts</h1>
-        </header>
         <EmptyState title="No accounts found" body="No accounts are linked yet." />
       </div>
     )
@@ -35,7 +32,6 @@ function AccountsPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <h1>Accounts</h1>
         <p>
           {accounts.length} accounts across {groups.length} categories.
         </p>
