@@ -1,6 +1,42 @@
 // Stroke-based icon set (matches the login page's icon style: 24x24, currentColor,
 // 1.8 stroke) so nav chrome and auth screens read as one consistent visual system.
 
+export function UserIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M4.5 20c1.4-3.6 4.4-5.5 7.5-5.5s6.1 1.9 7.5 5.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <rect x="5" y="10.5" width="14" height="9" rx="2" />
+      <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function EyeIcon({ off }) {
+  return off ? (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M3 3l18 18" strokeLinecap="round" />
+      <path
+        d="M10.6 5.2A10.6 10.6 0 0 1 12 5c5 0 9 4 10 7-.4 1.2-1.2 2.5-2.3 3.7M6.5 6.6C4.4 8 2.9 10 2 12c1 3 5 7 10 7 1.4 0 2.7-.3 3.9-.8"
+        strokeLinecap="round"
+      />
+      <path d="M9.9 10a2.5 2.5 0 0 0 3.6 3.5" strokeLinecap="round" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M2 12c1-3 5-7 10-7s9 4 10 7c-1 3-5 7-10 7s-9-4-10-7Z" />
+      <circle cx="12" cy="12" r="2.75" />
+    </svg>
+  )
+}
+
 export function MenuIcon() {
   return (
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8">

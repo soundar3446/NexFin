@@ -9,7 +9,7 @@ body {
 }
 
 .form-error {
-  color: #d64545;
+  color: var(--viz-critical, #d64545);
 }
 
 /* Login */
@@ -19,8 +19,9 @@ body {
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: radial-gradient(circle at 15% 15%, #1c2b4a 0%, #0b1626 55%, #060c17 100%);
-  color: #eef2fa;
+  background: var(--bg-page, #f3f4f8);
+  color: var(--text-primary, #0f172a);
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .login-shell {
@@ -32,7 +33,7 @@ body {
   background: #0f1c33;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.06);
 }
 
 .login-brand {
@@ -138,12 +139,20 @@ body {
 }
 
 .login-panel {
-  background: #f7f9fc;
-  color: #10182b;
+  position: relative;
+  background: var(--surface-2, #f3f4f8);
+  color: var(--text-primary, #10182b);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2.5rem 2rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.login-theme-toggle {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
 }
 
 .login-card {
@@ -161,7 +170,7 @@ body {
 
 .login-card-header p {
   margin: 0;
-  color: #5b6478;
+  color: var(--text-secondary, #5b6478);
   font-size: 0.9rem;
 }
 
@@ -171,7 +180,7 @@ body {
   gap: 0.35rem;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #33405e;
+  color: var(--text-primary, #33405e);
 }
 
 .input-wrapper {
@@ -184,7 +193,7 @@ body {
   position: absolute;
   left: 0.85rem;
   display: inline-flex;
-  color: #8892a8;
+  color: var(--text-muted, #8892a8);
 }
 
 .input-wrapper input {
@@ -192,11 +201,11 @@ body {
   padding: 0.7rem 0.9rem 0.7rem 2.5rem;
   font-size: 0.95rem;
   font-weight: 400;
-  border: 1.5px solid #dde2ee;
+  border: 1.5px solid var(--border-hairline, #dde2ee);
   border-radius: 10px;
-  background: #ffffff;
-  color: #10182b;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  background: var(--surface-1, #ffffff);
+  color: var(--text-primary, #10182b);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .input-wrapper input:focus {
@@ -213,13 +222,13 @@ body {
   justify-content: center;
   background: none;
   border: none;
-  color: #8892a8;
+  color: var(--text-muted, #8892a8);
   cursor: pointer;
   padding: 0.3rem;
 }
 
 .input-adornment-btn:hover {
-  color: #4b5468;
+  color: var(--text-primary, #4b5468);
 }
 
 .consent-row {
@@ -228,7 +237,7 @@ body {
   gap: 0.6rem;
   font-size: 0.8rem;
   line-height: 1.45;
-  color: #4b5468;
+  color: var(--text-secondary, #4b5468);
   cursor: pointer;
 }
 
@@ -303,7 +312,7 @@ body {
   justify-content: center;
   margin: 0.25rem 0 0;
   font-size: 0.76rem;
-  color: #8892a8;
+  color: var(--text-muted, #8892a8);
   text-align: center;
 }
 
@@ -336,7 +345,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem 1.75rem 1rem;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .terms-modal-header h2 {
@@ -380,12 +389,12 @@ body {
 
 .terms-modal-footer {
   padding: 1rem 1.75rem 1.5rem;
-  border-top: 1px solid rgba(128, 128, 128, 0.2);
+  border-top: 1px solid var(--border-hairline);
 }
 
 .terms-modal-footer button {
   width: 100%;
-  background: #1a73e8;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
   color: white;
   border: none;
   border-radius: 8px;
@@ -394,25 +403,10 @@ body {
   cursor: pointer;
 }
 
-.modal button {
-  padding: 0.6rem;
-  font-size: 1rem;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  cursor: pointer;
+.terms-modal-footer button:hover {
+  filter: brightness(1.08);
 }
 
-.modal button {
-  background: #1a73e8;
-  color: white;
-}
-
-.modal button:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-/* Notice modal */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -425,14 +419,10 @@ body {
 
 .modal {
   max-width: 480px;
-  background: canvas;
-  color: canvastext;
+  background: var(--surface-1);
+  color: var(--text-primary);
   border-radius: 8px;
   padding: 2rem;
-}
-
-.modal button {
-  margin-top: 1rem;
 }
 
 /* ============ Dashboard shell ============ */

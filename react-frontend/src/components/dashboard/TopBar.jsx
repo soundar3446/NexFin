@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
+import ThemeToggle from '../ThemeToggle'
 import { useDashboardData } from '../../context/DashboardDataContext'
-import { useTheme } from '../../context/ThemeContext'
 
 const ROUTE_TITLES = {
   '/': 'Overview',
@@ -45,23 +45,6 @@ function initialsFor(username) {
     .slice(0, 2)
     .map((p) => p[0].toUpperCase())
     .join('')
-}
-
-function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme()
-  const isDark = theme === 'dark'
-
-  return (
-    <button
-      type="button"
-      className="theme-toggle"
-      onClick={toggleTheme}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-    >
-      {isDark ? '☀️' : '🌙'}
-    </button>
-  )
 }
 
 function ProfileMenu({ username, onLogout }) {
