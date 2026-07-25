@@ -6,3 +6,5 @@ pydantic-settings==2.5.2
 python-dotenv==1.0.1
 httpx==0.27.2
 pyjwt==2.9.0
+
+# Chat uses an OpenAI-compatible HTTP API via httpx (no extra SDK required).

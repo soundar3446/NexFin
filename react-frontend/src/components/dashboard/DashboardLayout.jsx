@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { decodeJwt } from '../../utils/jwt'
+import ChatWidget from '../chat/ChatWidget'
 import ScrollToTop from './ScrollToTop'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
@@ -28,6 +29,7 @@ function DashboardLayout({ token, onLogout }) {
           </div>
         </main>
       </div>
+      <ChatWidget token={token} />
     </div>
   )
 }

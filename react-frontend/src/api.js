@@ -88,3 +88,14 @@ export function getIncomeExpenseTrend(token, months = 6) {
 export function getUnusualSpending(token, months = 3) {
   return request('/insights/unusual-spending', { token, params: { months } })
 }
+
+export function sendChat(token, message, accountId) {
+  return request('/chat', {
+    method: 'POST',
+    token,
+    body: {
+      message,
+      ...(accountId ? { account_id: accountId } : {}),
+    },
+  })
+}

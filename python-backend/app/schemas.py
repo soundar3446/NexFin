@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -86,6 +87,32 @@ class HealthObservation(BaseModel):
 class MonthlyHealthSummary(BaseModel):
     month: str
     observations: list[HealthObservation]
+
+
+class ChatRequest(BaseModel):
+    message: str
+    account_id: str | None = None
+
+
+class RecentTransactionOut(BaseModel):
+    transaction_id: str
+    account_id: str
+    nickname: str | None = None
+    amount: float
+    currency: str
+    credit_debit_indicator: str
+    status: str | None = None
+    booking_datetime: datetime
+    transaction_information: str | None = None
+    merchant_name: str | None = None
+    category: str | None = None
+
+
+class ChatResponse(BaseModel):
+    reply: str
+    tool_called: str | None = None
+    data_type: str | None = None
+    data: Any | None = None
 
 
 class CategoryAmount(BaseModel):

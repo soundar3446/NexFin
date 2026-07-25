@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     hf_model: str = "Qwen/Qwen2.5-7B-Instruct"
     hf_router_url: str = "https://router.huggingface.co/v1/chat/completions"
 
+    # OpenAI-compatible chat API (OpenAI, Groq, Gemini OpenAI compat, local Ollama, etc.)
+    llm_api_key: str = ""
+    llm_base_url: str = "https://api.openai.com/v1"
+    llm_model: str = "gpt-4o-mini"
+
     class Config:
         env_file = ".env"
 
