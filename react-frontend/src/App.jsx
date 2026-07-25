@@ -7,8 +7,12 @@ import AccountInsightsPage from './components/dashboard/account/pages/AccountIns
 import AccountOverviewPage from './components/dashboard/account/pages/AccountOverviewPage'
 import AccountTransactionsPage from './components/dashboard/account/pages/AccountTransactionsPage'
 import DashboardLayout from './components/dashboard/DashboardLayout'
+import InsightsLayout from './components/dashboard/insights/InsightsLayout'
+import InsightsCategoriesPage from './components/dashboard/insights/pages/InsightsCategoriesPage'
+import InsightsOverviewPage from './components/dashboard/insights/pages/InsightsOverviewPage'
+import InsightsTrendsPage from './components/dashboard/insights/pages/InsightsTrendsPage'
+import InsightsUnusualPage from './components/dashboard/insights/pages/InsightsUnusualPage'
 import AccountsPage from './components/dashboard/pages/AccountsPage'
-import InsightsPage from './components/dashboard/pages/InsightsPage'
 import NotFoundPage from './components/dashboard/pages/NotFoundPage'
 import OverviewPage from './components/dashboard/pages/OverviewPage'
 import TransactionsPage from './components/dashboard/pages/TransactionsPage'
@@ -47,7 +51,12 @@ function App() {
             <Route path="details" element={<AccountDetailsPage />} />
           </Route>
           <Route path="transactions" element={<TransactionsPage />} />
-          <Route path="insights" element={<InsightsPage />} />
+          <Route path="insights" element={<InsightsLayout />}>
+            <Route index element={<InsightsOverviewPage />} />
+            <Route path="categories" element={<InsightsCategoriesPage />} />
+            <Route path="trends" element={<InsightsTrendsPage />} />
+            <Route path="unusual" element={<InsightsUnusualPage />} />
+          </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

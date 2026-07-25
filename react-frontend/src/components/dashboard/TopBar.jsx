@@ -8,6 +8,9 @@ const ROUTE_TITLES = {
   '/accounts': 'Accounts',
   '/transactions': 'Transactions',
   '/insights': 'Insights',
+  '/insights/categories': 'Insights · Categories',
+  '/insights/trends': 'Insights · Trends',
+  '/insights/unusual': 'Insights · Unusual spending',
 }
 
 const ACCOUNT_SUB_TITLES = {
