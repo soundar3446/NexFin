@@ -17,7 +17,32 @@ Open Banking account aggregation with AI-assisted spend analysis: connect a bank
 
 A React client talks to one FastAPI backend, which is the only thing that touches the database or calls out to external services (Keycloak for login, the bank's core-api for account data, Hugging Face for AI insights).
 
-**[View the architecture diagram →](https://claude.ai/code/artifact/5bb54336-24fb-4665-b067-7762e60242dc)**
+```mermaid
+flowchart TD
+    Client["React Frontend"] --> Backend["NexFin Backend (FastAPI)"]
+    Backend --> DB[(PostgreSQL)]
+    Backend --> Keycloak["Keycloak (login)"]
+    Backend --> CoreAPI["core-api (Open Banking)"]
+    Backend --> HF["Hugging Face (AI insights)"]
+```
+
+**[View the interactive diagram →](https://claude.ai/code/artifact/5bb54336-24fb-4665-b067-7762e60242dc)**
+
+**Example — calling `GET /analysis/monthly-spending`:** this one never touches core-api directly, only Postgres, which is why it's fast even though it returns computed results, not raw pass-through data:
+
+```mermaid
+sequenceDiagram
+    participant C as React Frontend
+    participant B as NexFin Backend
+    participant DB as PostgreSQL
+
+    C->>B: GET /analysis/monthly-spending<br/>Authorization: Bearer &lt;token&gt;
+    B->>DB: SELECT transactions for this user's accounts
+    DB-->>B: rows (amount, category, date, ...)
+    Note over B: group by month, split spend vs income,<br/>total by category/merchant/account
+    B-->>C: 200 OK
+    Note over C: [{ "month": "2026-07",<br/>"total_spend": 2242.00,<br/>"total_income": 2000.00,<br/>"by_category": [...] }]
+```
 
 For how a specific endpoint calculates its results, see [ENDPOINTS.md](ENDPOINTS.md). For the code-level implementation and service layer, see [python-backend/WIKI.md](python-backend/WIKI.md). For the legal/data-handling rationale (PSD2/GDPR) behind what gets stored, see [PRIVACY.md](PRIVACY.md).
 
@@ -93,5 +118,7 @@ Interactive docs (Swagger UI) are available at `/docs` once the backend is runni
 ## Documentation
 
 - **[ENDPOINTS.md](ENDPOINTS.md)** — the logic behind each endpoint: what's calculated and how, no code.
+- **[CALCULATIONS.md](CALCULATIONS.md)** — the same logic with fields used and a worked numeric example for each endpoint.
+- **[FRONTEND_ENDPOINTS.md](FRONTEND_ENDPOINTS.md)** — which frontend page calls which backend endpoint.
 - **[python-backend/WIKI.md](python-backend/WIKI.md)** — code-level implementation and the service layer underneath each endpoint.
 - **[PRIVACY.md](PRIVACY.md)** — the legal basis (PSD2/GDPR) and data model rationale for what gets stored.
