@@ -33,7 +33,7 @@ function InsightsCategoriesPage() {
   return (
     <div className="page">
       <div className="page-header page-header-row">
-        <p>AI-categorized spending, broken down by category.</p>
+        <p>Accont Holder spending, broken down by category.</p>
         <PeriodSelect value={period} onChange={setPeriod} />
       </div>
 
