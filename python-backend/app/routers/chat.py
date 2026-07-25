@@ -21,3 +21,4 @@ def chat(
         preferred_account_id=payload.account_id,
     )
     return schemas.ChatResponse(**result)
+ 
