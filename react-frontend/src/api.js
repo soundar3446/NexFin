@@ -76,3 +76,15 @@ export function getMonthlySpending(token) {
 export function getFinancialHealth(token) {
   return request('/analysis/financial-health', { token })
 }
+
+export function getCategoryBreakdown(token, months = 3) {
+  return request('/insights/category-breakdown', { token, params: { months } })
+}
+
+export function getIncomeExpenseTrend(token, months = 6) {
+  return request('/insights/income-expense-trend', { token, params: { months } })
+}
+
+export function getUnusualSpending(token, months = 3) {
+  return request('/insights/unusual-spending', { token, params: { months } })
+}
