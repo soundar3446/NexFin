@@ -31,14 +31,6 @@ export function login(username, password) {
   return request('/auth/login', { method: 'POST', body: { username, password } })
 }
 
-export function getNoticeStatus(token) {
-  return request('/me/notice', { token })
-}
-
-export function acknowledgeNotice(token) {
-  return request('/me/notice/ack', { method: 'POST', token })
-}
-
 export function listAccounts(token, { type } = {}) {
   return request('/accounts', { token, params: { type } })
 }
