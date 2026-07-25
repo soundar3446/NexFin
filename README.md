@@ -53,5 +53,7 @@ Interactive docs (Swagger UI) are also available at `/docs` once the backend is 
 | GET | `/me/notice` | Bearer | Whether the current user has acknowledged the data-usage notice (`{acknowledged, acknowledged_at}`) |
 | POST | `/me/notice/ack` | Bearer | Records the current user's acknowledgement (idempotent) |
 | DELETE | `/me/notice/ack` | Bearer | Revokes the current user's acknowledgement (idempotent) |
+| POST | `/sync/accounts` | Bearer | Pulls the caller's accounts + all transactions from core-api and upserts them into the DB (see [PRIVACY.md](PRIVACY.md) for exactly which fields are stored and why) |
+| GET | `/analysis/monthly-spending` | Bearer | Reads the caller's stored transactions and returns per-month spend/income totals (with a pending vs. settled breakdown) plus category and merchant breakdowns |
 
-"Bearer" means the request needs an `Authorization: Bearer <token>` header — get a token from `/auth/login` first. For the `/accounts/*` routes the token is forwarded as-is to core-api; for `/me/notice*` the backend reads the token's `sub` claim to identify the user (signature isn't verified there — core-api independently verifies the token on every real data request).
+"Bearer" means the request needs an `Authorization: Bearer <token>` header — get a token from `/auth/login` first. For the `/accounts/*` routes the token is forwarded as-is to core-api; for `/me/notice*`, `/sync/*`, and `/analysis/*` the backend reads the token's `sub` claim to identify the user (signature isn't verified there — core-api independently verifies the token on every real data request). Run `/sync/accounts` before calling `/analysis/monthly-spending` — the analysis endpoint only reads what's already been synced into the DB, it doesn't hit core-api itself.

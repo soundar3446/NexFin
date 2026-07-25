@@ -36,3 +36,29 @@ class TokenResponse(BaseModel):
 class AcknowledgementStatus(BaseModel):
     acknowledged: bool
     acknowledged_at: datetime | None = None
+
+
+class SyncResult(BaseModel):
+    accounts_synced: int
+    transactions_synced: int
+
+
+class MonthlyCategoryBreakdown(BaseModel):
+    merchant_category_code: str | None
+    total: float
+
+
+class MonthlyMerchantBreakdown(BaseModel):
+    merchant_name: str | None
+    total: float
+
+
+class MonthlySpendSummary(BaseModel):
+    month: str
+    total_spend: float
+    total_income: float
+    pending_spend: float
+    pending_income: float
+    transaction_count: int
+    by_category: list[MonthlyCategoryBreakdown]
+    by_merchant: list[MonthlyMerchantBreakdown]

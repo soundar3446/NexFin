@@ -407,6 +407,121 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Sync",
+      "item": [
+        {
+          "name": "Sync Accounts",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/sync/accounts", "host": ["{{base_url}}"], "path": ["sync", "accounts"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('has accounts_synced and transactions_synced', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('accounts_synced');",
+                  "    pm.expect(body).to.have.property('transactions_synced');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sync Accounts - Missing Auth Header",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/sync/accounts", "host": ["{{base_url}}"], "path": ["sync", "accounts"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status code is 422', () => pm.response.to.have.status(422));"]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Analysis",
+      "item": [
+        {
+          "name": "Monthly Spending",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analysis/monthly-spending",
+              "host": ["{{base_url}}"],
+              "path": ["analysis", "monthly-spending"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('response is an array', () => pm.expect(pm.response.json()).to.be.an('array'));",
+                  "const body = pm.response.json();",
+                  "if (body.length > 0) {",
+                  "    pm.test('month entries have expected shape', () => {",
+                  "        const entry = body[0];",
+                  "        pm.expect(entry).to.have.property('month');",
+                  "        pm.expect(entry).to.have.property('total_spend');",
+                  "        pm.expect(entry).to.have.property('total_income');",
+                  "        pm.expect(entry).to.have.property('pending_spend');",
+                  "        pm.expect(entry).to.have.property('pending_income');",
+                  "        pm.expect(entry).to.have.property('by_category');",
+                  "        pm.expect(entry).to.have.property('by_merchant');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Monthly Spending - Missing Auth Header",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/analysis/monthly-spending",
+              "host": ["{{base_url}}"],
+              "path": ["analysis", "monthly-spending"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status code is 422', () => pm.response.to.have.status(422));"]
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
