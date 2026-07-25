@@ -43,10 +43,40 @@ export function listAccounts(token, { type } = {}) {
   return request('/accounts', { token, params: { type } })
 }
 
+export function getAccount(token, accountId) {
+  return request(`/accounts/${accountId}`, { token })
+}
+
 export function getBalances(token, accountId) {
   return request(`/accounts/${accountId}/balances`, { token })
 }
 
 export function getTransactions(token, accountId, { pageIndex, pageSize } = {}) {
   return request(`/accounts/${accountId}/transactions`, { token, params: { pageIndex, pageSize } })
+}
+
+// The core API silently caps pageSize (observed max: 50), so full history needs paging.
+export async function getAllTransactions(token, accountId) {
+  const pageSize = 50
+  let pageIndex = 0
+  let all = []
+
+  while (true) {
+    const res = await getTransactions(token, accountId, { pageIndex, pageSize })
+    const page = res.Data.Transaction || []
+    all = all.concat(page)
+    const total = res.Data.Pagination?.total ?? all.length
+    pageIndex += 1
+    if (page.length === 0 || all.length >= total) break
+  }
+
+  return all
+}
+
+export function syncAccounts(token) {
+  return request('/sync/accounts', { method: 'POST', token })
+}
+
+export function getMonthlySpending(token) {
+  return request('/analysis/monthly-spending', { token })
 }
