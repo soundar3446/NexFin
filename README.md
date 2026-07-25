@@ -2,6 +2,8 @@
 
 FastAPI backend + React (Vite) frontend, with Postgres.
 
+Stores and analyses Open Banking data — see [PRIVACY.md](PRIVACY.md) for the legal basis (PSD2/GDPR) and data model plan before adding any customer-data storage.
+
 ## Run everything with Docker
 
 ```
