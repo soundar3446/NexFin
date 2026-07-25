@@ -1302,49 +1302,6 @@ body {
   background-size: 14px;
 }
 
-/* Insights: category bar chart (sequential, single hue) */
-.bar-chart {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.bar-chart-row {
-  display: grid;
-  grid-template-columns: 140px 1fr auto;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.bar-chart-row-label {
-  font-size: 0.82rem;
-  color: var(--viz-text-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.bar-chart-track {
-  background: var(--viz-gridline);
-  border-radius: 4px;
-  height: 20px;
-  overflow: hidden;
-}
-
-.bar-chart-fill {
-  height: 100%;
-  max-height: 20px;
-  background: var(--viz-series-1);
-  border-radius: 4px;
-}
-
-.bar-chart-row-value {
-  font-size: 0.82rem;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  min-width: 70px;
-}
-
 /* Insights: financial health observations (status palette, reserved) */
 .health-list {
   list-style: none;
@@ -1430,13 +1387,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Insights: income vs spend trend (categorical, 2 series) */
-.trend-chart {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
+/* Legend row shared by line/pie chart headers */
 .trend-chart-legend {
   display: flex;
   gap: 1.25rem;
@@ -1455,78 +1406,6 @@ body {
   height: 10px;
   border-radius: 2px;
   display: inline-block;
-}
-
-.legend-swatch.series-1 {
-  background: var(--viz-series-1);
-}
-
-.legend-swatch.series-2 {
-  background: var(--viz-series-2);
-}
-
-.trend-chart-plot {
-  display: flex;
-  align-items: flex-end;
-  gap: 1.5rem;
-  height: 220px;
-  padding-top: 1.5rem;
-  border-bottom: 1px solid var(--viz-gridline);
-  overflow-x: auto;
-}
-
-.trend-chart-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-  height: 100%;
-  justify-content: flex-end;
-}
-
-.trend-chart-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 100%;
-}
-
-.trend-bar-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  height: 100%;
-  width: 22px;
-}
-
-.trend-bar-value {
-  font-size: 0.68rem;
-  color: var(--viz-text-muted);
-  margin-bottom: 0.3rem;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
-.trend-bar {
-  width: 100%;
-  max-width: 22px;
-  border-radius: 4px 4px 0 0;
-}
-
-.trend-bar.series-1 {
-  background: var(--viz-series-1);
-}
-
-.trend-bar.series-2 {
-  background: var(--viz-series-2);
-}
-
-.trend-chart-month {
-  font-size: 0.76rem;
-  color: var(--viz-text-secondary);
-  white-space: nowrap;
 }
 
 /* Account dashboard */
@@ -1709,4 +1588,204 @@ body {
   .pie-chart-wrap {
     align-self: center;
   }
+}
+
+/* Line chart: income vs spend trend (responsive, no horizontal scroll) */
+.line-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.legend-line-swatch {
+  width: 14px;
+  height: 2px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.legend-line-swatch.series-1 {
+  background: var(--viz-series-1);
+}
+
+.legend-line-swatch.series-2 {
+  background: var(--viz-series-2);
+}
+
+.line-chart-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.line-chart-svg {
+  width: 100%;
+  height: 220px;
+  display: block;
+  cursor: crosshair;
+}
+
+.line-chart-grid {
+  stroke: var(--viz-gridline);
+  stroke-width: 1;
+}
+
+.line-chart-crosshair {
+  stroke: var(--border-hairline);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.line-chart-tooltip {
+  position: absolute;
+  top: 0.5rem;
+  transform: translateX(-50%);
+  background: var(--surface-1);
+  border: 1px solid var(--border-hairline);
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+  padding: 0.5rem 0.7rem;
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 5;
+}
+
+.line-chart-tooltip strong {
+  font-size: 0.8rem;
+}
+
+.line-chart-tooltip span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.line-chart-x-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 8px;
+}
+
+.line-chart-x-labels span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  visibility: hidden;
+  white-space: nowrap;
+}
+
+.line-chart-x-labels span.visible {
+  visibility: visible;
+}
+
+/* AI insights section */
+.ai-section-header {
+  margin-top: 0.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.ai-section-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+}
+
+.ai-insight-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.ai-insight-badge {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: #6366f1;
+  color: white;
+}
+
+.ai-insight-badge.fallback {
+  background: var(--surface-3);
+  color: var(--text-secondary);
+}
+
+/* Unusual spending / anomaly list */
+.anomaly-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.anomaly-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  border-left: 3px solid var(--text-muted);
+  background: var(--surface-2);
+}
+
+.anomaly-item.severity-high {
+  border-left-color: var(--viz-critical);
+}
+
+.anomaly-item.severity-medium {
+  border-left-color: #b57900;
+}
+
+.anomaly-icon {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.anomaly-item.severity-high .anomaly-icon {
+  color: var(--viz-critical);
+}
+
+.anomaly-item.severity-medium .anomaly-icon {
+  color: #b57900;
+}
+
+.anomaly-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.anomaly-merchant {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.anomaly-reason {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.anomaly-amount {
+  flex-shrink: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }

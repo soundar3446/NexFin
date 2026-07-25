@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { categorizeTransaction } from '../../../../utils/categories'
 import { formatAmount, monthLabel } from '../../../../utils/format'
-import CategoryBarChart from '../../shared/charts/CategoryBarChart'
-import IncomeExpenseChart from '../../shared/charts/IncomeExpenseChart'
+import LineChart from '../../shared/charts/LineChart'
+import PieChart from '../../shared/charts/PieChart'
 import MonthNavigator from '../../shared/MonthNavigator'
 import { EmptyState } from '../../shared/States'
 import StatCard from '../../shared/StatCard'
@@ -102,7 +102,11 @@ function AccountInsightsPage() {
         {current.by_category.length === 0 ? (
           <EmptyState title="No spending this month" />
         ) : (
-          <CategoryBarChart data={current.by_category} currency={currency} />
+          <PieChart
+            categories={current.by_category.map((c) => ({ category: c.label, total: c.total }))}
+            currency={currency}
+            total={current.total_spend}
+          />
         )}
       </section>
 
@@ -130,7 +134,10 @@ function AccountInsightsPage() {
           <div className="section-header">
             <h2>Income vs. spend by month</h2>
           </div>
-          <IncomeExpenseChart months={chronological} currency={currency} />
+          <LineChart
+            months={chronological.map((m) => ({ month: m.month, income: m.total_income, expense: m.total_spend }))}
+            currency={currency}
+          />
         </section>
       )}
     </div>

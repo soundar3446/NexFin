@@ -14,8 +14,7 @@ function foldToSlices(categories) {
   const tail = categories.slice(MAX_SLICES)
   const otherTotal = tail.reduce((sum, c) => sum + c.total, 0)
   const otherCount = tail.reduce((sum, c) => sum + (c.transaction_count || 0), 0)
-  const otherPct = tail.reduce((sum, c) => sum + (c.percentage || 0), 0)
-  return [...head, { category: 'Other', total: otherTotal, percentage: otherPct, transaction_count: otherCount }]
+  return [...head, { category: 'Other', total: otherTotal, transaction_count: otherCount }]
 }
 
 // Part-to-whole "spend by category" as a donut: the empty hole doubles as the
@@ -31,7 +30,8 @@ function PieChart({ categories, currency, total }) {
     const length = fraction * CIRCUMFERENCE
     const offset = cumulative
     cumulative += length
-    return { ...slice, length, offset, colorVar: SLOT_VARS[i % SLOT_VARS.length] }
+    const percentage = Math.round(fraction * 1000) / 10
+    return { ...slice, length, offset, percentage, colorVar: SLOT_VARS[i % SLOT_VARS.length] }
   })
 
   const active = hovered !== null ? segments[hovered] : null
