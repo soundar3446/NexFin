@@ -96,3 +96,6 @@ Interactive docs (Swagger UI) are available at `/docs` once the backend is runni
 - **[FRONTEND_ENDPOINTS.md](FRONTEND_ENDPOINTS.md)** — which frontend page calls which backend endpoint.
 - **[python-backend/WIKI.md](python-backend/WIKI.md)** — code-level implementation and the service layer underneath each endpoint.
 - **[PRIVACY.md](PRIVACY.md)** — the legal basis (PSD2/GDPR) and data model rationale for what gets stored.
+
+
+Recording link - https://drive.google.com/file/d/1UVnmVVwBDPPDwVWKfQ-PmaawFCJnUGxZ/view?usp=drive_link
