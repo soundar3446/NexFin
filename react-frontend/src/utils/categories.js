@@ -36,47 +36,20 @@ const MCC_CATEGORY_MAP = {
   '6011': 'Cash Withdrawal',
 }
 
-const CATEGORY_ICON = {
-  Groceries: '🛒',
-  'Dining & Restaurants': '🍽️',
-  Transport: '🚗',
-  'Utilities & Bills': '💡',
-  'Rent & Mortgage': '🏠',
-  Shopping: '🛍️',
-  'Entertainment & Leisure': '🎬',
-  Subscriptions: '📺',
-  'Health & Fitness': '🏥',
-  Travel: '✈️',
-  Insurance: '🛡️',
-  Education: '🎓',
-  'Cash Withdrawal': '💵',
-  'Fees & Charges': '💳',
-  'Other Expense': '🧾',
-  Salary: '💰',
-  'Interest & Investment Income': '📈',
-  Refunds: '↩️',
-  'Transfers In': '🔁',
-  'Other Income': '💷',
-  Transfers: '🔁',
-}
-
 const TRANSFER_CODES = new Set(['IssuedCreditTransfer', 'ReceivedCreditTransfer', 'Transfer'])
 
-export function iconForCategory(category) {
-  return CATEGORY_ICON[category] || '🧾'
-}
-
+// Icon lookup for a category name lives in shared/icons.jsx (CategoryIcon) --
+// single source of truth for how a category renders, not duplicated here.
 export function categorizeTransaction(txn) {
   const bankCode = txn.BankTransactionCode?.Code
   if (bankCode && TRANSFER_CODES.has(bankCode) && !txn.MerchantDetails?.MerchantName) {
-    return { label: 'Transfers', icon: iconForCategory('Transfers') }
+    return { label: 'Transfers' }
   }
 
   const isDebit = txn.CreditDebitIndicator === 'Debit'
   const mcc = txn.MerchantDetails?.MerchantCategoryCode
   const category = mcc && MCC_CATEGORY_MAP[mcc]
-  if (category) return { label: category, icon: iconForCategory(category) }
+  if (category) return { label: category }
 
-  const fallback = isDebit ? 'Other Expense' : 'Other Income'
-  return { label: fallback, icon: iconForCategory(fallback) }
+  return { label: isDebit ? 'Other Expense' : 'Other Income' }
 }

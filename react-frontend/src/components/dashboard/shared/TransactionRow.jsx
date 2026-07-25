@@ -1,5 +1,6 @@
 import { categorizeTransaction } from '../../../utils/categories'
 import { formatAmount, formatDate } from '../../../utils/format'
+import { CategoryIcon } from './icons'
 
 function TransactionRow({ txn, showAccount = true }) {
   const category = categorizeTransaction(txn)
@@ -7,7 +8,9 @@ function TransactionRow({ txn, showAccount = true }) {
 
   return (
     <li className="transaction-row">
-      <span className="transaction-category-icon">{category.icon}</span>
+      <span className="transaction-category-icon">
+        <CategoryIcon category={category.label} />
+      </span>
       <div className="transaction-main">
         <span className="transaction-info">
           {txn.TransactionInformation || txn.MerchantDetails?.MerchantName || 'Transaction'}

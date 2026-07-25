@@ -1128,7 +1128,14 @@ body {
 }
 
 .transaction-category-icon {
-  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--surface-3);
+  color: #6366f1;
   flex-shrink: 0;
 }
 
