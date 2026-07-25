@@ -364,6 +364,47 @@
               }
             }
           ]
+        },
+        {
+          "name": "Revoke Notice Acknowledgement",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/me/notice/ack", "host": ["{{base_url}}"], "path": ["me", "notice", "ack"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('acknowledged is false', () => pm.expect(pm.response.json().acknowledged).to.eql(false));",
+                  "pm.test('acknowledged_at is null', () => pm.expect(pm.response.json().acknowledged_at).to.be.null);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Revoke Notice Acknowledgement - Missing Auth Header",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/me/notice/ack", "host": ["{{base_url}}"], "path": ["me", "notice", "ack"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status code is 422', () => pm.response.to.have.status(422));"]
+              }
+            }
+          ]
         }
       ]
     }

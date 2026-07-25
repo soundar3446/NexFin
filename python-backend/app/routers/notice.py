@@ -40,3 +40,20 @@ def acknowledge_notice(
         db.refresh(ack)
 
     return schemas.AcknowledgementStatus(acknowledged=True, acknowledged_at=ack.acknowledged_at)
+
+
+@router.delete("/ack", response_model=schemas.AcknowledgementStatus)
+def revoke_notice_acknowledgement(
+    user_sub: str = Depends(get_current_user_sub),
+    db: Session = Depends(get_db),
+):
+    ack = (
+        db.query(models.DataUsageAcknowledgement)
+        .filter(models.DataUsageAcknowledgement.user_sub == user_sub)
+        .first()
+    )
+    if ack is not None:
+        db.delete(ack)
+        db.commit()
+
+    return schemas.AcknowledgementStatus(acknowledged=False)

@@ -52,5 +52,6 @@ Interactive docs (Swagger UI) are also available at `/docs` once the backend is 
 | GET | `/accounts/{account_id}/transactions?pageIndex=&pageSize=` | Bearer | Proxies to core-api: account transactions, paginated |
 | GET | `/me/notice` | Bearer | Whether the current user has acknowledged the data-usage notice (`{acknowledged, acknowledged_at}`) |
 | POST | `/me/notice/ack` | Bearer | Records the current user's acknowledgement (idempotent) |
+| DELETE | `/me/notice/ack` | Bearer | Revokes the current user's acknowledgement (idempotent) |
 
 "Bearer" means the request needs an `Authorization: Bearer <token>` header — get a token from `/auth/login` first. For the `/accounts/*` routes the token is forwarded as-is to core-api; for `/me/notice*` the backend reads the token's `sub` claim to identify the user (signature isn't verified there — core-api independently verifies the token on every real data request).
