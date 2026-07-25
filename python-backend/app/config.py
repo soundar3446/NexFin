@@ -11,6 +11,10 @@ class Settings(BaseSettings):
 
     core_api_base_url: str = ""
 
+    hf_api_token: str = ""
+    hf_model: str = "Qwen/Qwen2.5-7B-Instruct"
+    hf_router_url: str = "https://router.huggingface.co/v1/chat/completions"
+
     class Config:
         env_file = ".env"
 
