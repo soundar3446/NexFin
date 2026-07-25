@@ -1,12 +1,3 @@
-export function LoadingState({ label = 'Loading...' }) {
-  return (
-    <div className="page-state">
-      <span className="spinner spinner-dark" aria-hidden="true" />
-      <p>{label}</p>
-    </div>
-  )
-}
-
 export function ErrorState({ message }) {
   return (
     <div className="page-state">

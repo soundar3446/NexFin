@@ -4,7 +4,8 @@ import { getFinancialHealth, getMonthlySpending, syncAccounts } from '../../../a
 import { formatAmount, monthLabel } from '../../../utils/format'
 import CategoryBarChart from '../shared/charts/CategoryBarChart'
 import IncomeExpenseChart from '../shared/charts/IncomeExpenseChart'
-import { EmptyState, ErrorState, LoadingState } from '../shared/States'
+import { SkeletonList, SkeletonStatRow } from '../shared/Skeletons'
+import { EmptyState, ErrorState } from '../shared/States'
 import StatCard from '../shared/StatCard'
 
 function InsightsPage() {
@@ -38,7 +39,14 @@ function InsightsPage() {
     load()
   }, [load])
 
-  if (loading) return <LoadingState label="Analysing your spending..." />
+  if (loading) {
+    return (
+      <div className="page">
+        <SkeletonStatRow />
+        <SkeletonList rows={5} />
+      </div>
+    )
+  }
   if (error) return <ErrorState message={error} />
   if (!months || months.length === 0) {
     return (

@@ -1,7 +1,8 @@
 import { Link, NavLink, Outlet, useParams } from 'react-router-dom'
 import { useDashboardData } from '../../../context/DashboardDataContext'
 import { formatAmount } from '../../../utils/format'
-import { EmptyState, LoadingState } from '../shared/States'
+import { SkeletonList } from '../shared/Skeletons'
+import { EmptyState } from '../shared/States'
 
 const NICKNAME_ICON = {
   Bills: '🧾',
@@ -22,7 +23,20 @@ function AccountLayout() {
   const { accountId } = useParams()
   const { loading, getAccount, getAccountTransactions } = useDashboardData()
 
-  if (loading) return <LoadingState label="Loading account..." />
+  if (loading) {
+    return (
+      <div className="page">
+        <div className="account-header">
+          <div className="skeleton" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+          <div className="account-header-info">
+            <div className="skeleton" style={{ width: '30%', height: 18 }} />
+            <div className="skeleton" style={{ width: '45%', height: 12, marginTop: 8 }} />
+          </div>
+        </div>
+        <SkeletonList rows={4} />
+      </div>
+    )
+  }
 
   const account = getAccount(accountId)
   if (!account) {

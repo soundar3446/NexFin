@@ -9,6 +9,7 @@ import AccountTransactionsPage from './components/dashboard/account/pages/Accoun
 import DashboardLayout from './components/dashboard/DashboardLayout'
 import AccountsPage from './components/dashboard/pages/AccountsPage'
 import InsightsPage from './components/dashboard/pages/InsightsPage'
+import NotFoundPage from './components/dashboard/pages/NotFoundPage'
 import OverviewPage from './components/dashboard/pages/OverviewPage'
 import TransactionsPage from './components/dashboard/pages/TransactionsPage'
 import LoginPage from './components/LoginPage'
@@ -47,6 +48,7 @@ function App() {
           </Route>
           <Route path="transactions" element={<TransactionsPage />} />
           <Route path="insights" element={<InsightsPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </DashboardDataProvider>

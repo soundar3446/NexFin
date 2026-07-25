@@ -42,7 +42,13 @@ function TransactionsPage() {
     })
   }, [transactions, filters])
 
-  if (loading) return <LoadingState label="Loading transactions..." />
+  if (loading) {
+    return (
+      <div className="page">
+        <SkeletonList rows={8} />
+      </div>
+    )
+  }
   if (error) return <ErrorState message={error} />
 
   const visible = filtered.slice(0, visibleCount)

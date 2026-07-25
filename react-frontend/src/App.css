@@ -1203,11 +1203,6 @@ body {
   color: var(--text-secondary);
 }
 
-.spinner-dark {
-  border: 2px solid var(--border-hairline);
-  border-top-color: #6366f1;
-}
-
 .empty-state {
   display: flex;
   flex-direction: column;
