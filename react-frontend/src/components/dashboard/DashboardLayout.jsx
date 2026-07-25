@@ -9,7 +9,7 @@ function DashboardLayout({ token, onLogout }) {
     <div className="app-shell">
       <Sidebar username={username} onLogout={onLogout} />
       <main className="app-content">
-        <Outlet />
+        <Outlet context={{ token }} />
       </main>
     </div>
   )

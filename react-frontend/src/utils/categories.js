@@ -28,6 +28,12 @@ const MCC_MAP = {
 
 const TRANSFER_CODES = new Set(['IssuedCreditTransfer', 'ReceivedCreditTransfer', 'Transfer'])
 
+export function mccLabel(code) {
+  if (!code) return 'Uncategorised'
+  if (MCC_MAP[code]) return MCC_MAP[code].label
+  return `Other (${code})`
+}
+
 export function categorizeTransaction(txn) {
   const bankCode = txn.BankTransactionCode?.Code
   if (bankCode && TRANSFER_CODES.has(bankCode) && !txn.MerchantDetails?.MerchantName) {

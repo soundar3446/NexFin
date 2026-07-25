@@ -80,3 +80,7 @@ export function syncAccounts(token) {
 export function getMonthlySpending(token) {
   return request('/analysis/monthly-spending', { token })
 }
+
+export function getFinancialHealth(token) {
+  return request('/analysis/financial-health', { token })
+}

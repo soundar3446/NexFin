@@ -1,9 +1,16 @@
 import { useEffect, useState } from 'react'
+import { Route, Routes } from 'react-router-dom'
 import './App.css'
 import { acknowledgeNotice, getNoticeStatus } from './api'
-import Dashboard from './components/Dashboard'
+import DashboardLayout from './components/dashboard/DashboardLayout'
+import AccountDetailPlaceholder from './components/dashboard/pages/AccountDetailPlaceholder'
+import AccountsPage from './components/dashboard/pages/AccountsPage'
+import InsightsPage from './components/dashboard/pages/InsightsPage'
+import OverviewPage from './components/dashboard/pages/OverviewPage'
+import TransactionsPage from './components/dashboard/pages/TransactionsPage'
 import LoginPage from './components/LoginPage'
 import NoticeModal from './components/NoticeModal'
+import { DashboardDataProvider } from './context/DashboardDataContext'
 
 const TOKEN_KEY = 'nexfin_access_token'
 
@@ -66,7 +73,19 @@ function App() {
     return <NoticeModal onAgree={handleAgree} loading={ackLoading} />
   }
 
-  return <Dashboard token={token} onLogout={handleLogout} />
+  return (
+    <DashboardDataProvider token={token}>
+      <Routes>
+        <Route path="/" element={<DashboardLayout token={token} onLogout={handleLogout} />}>
+          <Route index element={<OverviewPage />} />
+          <Route path="accounts" element={<AccountsPage />} />
+          <Route path="accounts/:accountId" element={<AccountDetailPlaceholder />} />
+          <Route path="transactions" element={<TransactionsPage />} />
+          <Route path="insights" element={<InsightsPage />} />
+        </Route>
+      </Routes>
+    </DashboardDataProvider>
+  )
 }
 
 export default App
