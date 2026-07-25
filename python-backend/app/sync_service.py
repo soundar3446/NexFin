@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -52,6 +53,48 @@ def _upsert_transactions(db: Session, rows: list[dict]) -> None:
     db.execute(stmt)
 
 
+def _transaction_row(account_id: str, txn_data: dict) -> dict:
+    amount = txn_data["Amount"]
+    merchant = txn_data.get("MerchantDetails") or {}
+    bank_code = txn_data.get("BankTransactionCode") or {}
+    return {
+        "transaction_id": txn_data["TransactionId"],
+        "account_id": account_id,
+        "amount": amount["Amount"],
+        "currency": amount["Currency"],
+        "credit_debit_indicator": txn_data["CreditDebitIndicator"],
+        "status": txn_data.get("Status"),
+        "booking_datetime": datetime.fromisoformat(txn_data["BookingDateTime"].replace("Z", "+00:00")),
+        "transaction_information": txn_data.get("TransactionInformation"),
+        "merchant_name": merchant.get("MerchantName"),
+        "merchant_category_code": merchant.get("MerchantCategoryCode"),
+        "bank_transaction_code": bank_code.get("Code"),
+        "bank_transaction_sub_code": bank_code.get("SubCode"),
+    }
+
+
+async def _fetch_account_transactions(account_id: str, authorization: str) -> list[dict]:
+    """Pure network fetch, no DB access — safe to run concurrently across accounts."""
+    rows = []
+    page_index = 0
+    while True:
+        txn_res = await obie_get(
+            f"/{account_id}/transactions",
+            authorization,
+            {"pageIndex": page_index, "pageSize": PAGE_SIZE},
+        )
+        txn_list = txn_res["Data"]["Transaction"]
+        rows.extend(_transaction_row(account_id, txn_data) for txn_data in txn_list)
+
+        pagination = txn_res["Data"].get("Pagination") or {}
+        total = pagination.get("total", len(txn_list))
+        page_index += 1
+        if not txn_list or page_index * PAGE_SIZE >= total:
+            break
+
+    return rows
+
+
 async def sync_accounts_and_transactions(db: Session, user_sub: str, authorization: str) -> dict:
     accounts_res = await obie_get("", authorization, {"type": "domestic"})
     account_list = accounts_res["Data"]["Account"]
@@ -69,50 +112,19 @@ async def sync_accounts_and_transactions(db: Session, user_sub: str, authorizati
         for account_data in account_list
     ]
     _upsert_accounts(db, account_rows)
+    db.commit()
+
+    account_ids = [account_data["AccountId"] for account_data in account_list]
+    # Every account's transaction history is fetched concurrently — these are
+    # independent core-api calls, so there's no reason to wait on them one at a time.
+    per_account_rows = await asyncio.gather(
+        *[_fetch_account_transactions(account_id, authorization) for account_id in account_ids]
+    )
 
     transactions_synced = 0
-    for account_data in account_list:
-        account_id = account_data["AccountId"]
-        page_index = 0
-        while True:
-            txn_res = await obie_get(
-                f"/{account_id}/transactions",
-                authorization,
-                {"pageIndex": page_index, "pageSize": PAGE_SIZE},
-            )
-            txn_list = txn_res["Data"]["Transaction"]
-
-            txn_rows = []
-            for txn_data in txn_list:
-                amount = txn_data["Amount"]
-                merchant = txn_data.get("MerchantDetails") or {}
-                bank_code = txn_data.get("BankTransactionCode") or {}
-                txn_rows.append(
-                    {
-                        "transaction_id": txn_data["TransactionId"],
-                        "account_id": account_id,
-                        "amount": amount["Amount"],
-                        "currency": amount["Currency"],
-                        "credit_debit_indicator": txn_data["CreditDebitIndicator"],
-                        "status": txn_data.get("Status"),
-                        "booking_datetime": datetime.fromisoformat(
-                            txn_data["BookingDateTime"].replace("Z", "+00:00")
-                        ),
-                        "transaction_information": txn_data.get("TransactionInformation"),
-                        "merchant_name": merchant.get("MerchantName"),
-                        "merchant_category_code": merchant.get("MerchantCategoryCode"),
-                        "bank_transaction_code": bank_code.get("Code"),
-                        "bank_transaction_sub_code": bank_code.get("SubCode"),
-                    }
-                )
-            _upsert_transactions(db, txn_rows)
-            transactions_synced += len(txn_rows)
-
-            pagination = txn_res["Data"].get("Pagination") or {}
-            total = pagination.get("total", len(txn_list))
-            page_index += 1
-            if not txn_list or page_index * PAGE_SIZE >= total:
-                break
+    for txn_rows in per_account_rows:
+        _upsert_transactions(db, txn_rows)
+        transactions_synced += len(txn_rows)
 
     db.commit()
     return {"accounts_synced": len(account_rows), "transactions_synced": transactions_synced}
