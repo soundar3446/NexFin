@@ -1,8 +1,12 @@
 import { useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import './App.css'
+import AccountLayout from './components/dashboard/account/AccountLayout'
+import AccountDetailsPage from './components/dashboard/account/pages/AccountDetailsPage'
+import AccountInsightsPage from './components/dashboard/account/pages/AccountInsightsPage'
+import AccountOverviewPage from './components/dashboard/account/pages/AccountOverviewPage'
+import AccountTransactionsPage from './components/dashboard/account/pages/AccountTransactionsPage'
 import DashboardLayout from './components/dashboard/DashboardLayout'
-import AccountDetailPlaceholder from './components/dashboard/pages/AccountDetailPlaceholder'
 import AccountsPage from './components/dashboard/pages/AccountsPage'
 import InsightsPage from './components/dashboard/pages/InsightsPage'
 import OverviewPage from './components/dashboard/pages/OverviewPage'
@@ -35,7 +39,12 @@ function App() {
         <Route path="/" element={<DashboardLayout token={token} onLogout={handleLogout} />}>
           <Route index element={<OverviewPage />} />
           <Route path="accounts" element={<AccountsPage />} />
-          <Route path="accounts/:accountId" element={<AccountDetailPlaceholder />} />
+          <Route path="accounts/:accountId" element={<AccountLayout />}>
+            <Route index element={<AccountOverviewPage />} />
+            <Route path="transactions" element={<AccountTransactionsPage />} />
+            <Route path="insights" element={<AccountInsightsPage />} />
+            <Route path="details" element={<AccountDetailsPage />} />
+          </Route>
           <Route path="transactions" element={<TransactionsPage />} />
           <Route path="insights" element={<InsightsPage />} />
         </Route>

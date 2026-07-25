@@ -10,6 +10,13 @@ const ROUTE_TITLES = {
   '/insights': 'Insights',
 }
 
+const ACCOUNT_SUB_TITLES = {
+  '': 'Overview',
+  transactions: 'Transactions',
+  insights: 'Insights',
+  details: 'Details',
+}
+
 function usePageTitle() {
   const location = useLocation()
   const { accountId } = useParams()
@@ -18,7 +25,10 @@ function usePageTitle() {
   if (ROUTE_TITLES[location.pathname]) return ROUTE_TITLES[location.pathname]
   if (accountId) {
     const account = getAccount(accountId)
-    return account?.Nickname || 'Account'
+    const name = account?.Nickname || 'Account'
+    const subPath = location.pathname.split(`/accounts/${accountId}`)[1]?.replace(/^\//, '') || ''
+    const subTitle = ACCOUNT_SUB_TITLES[subPath]
+    return subTitle ? `${name} · ${subTitle}` : name
   }
   return 'NexFin'
 }

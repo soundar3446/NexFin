@@ -1410,3 +1410,72 @@ body {
   color: var(--viz-text-secondary);
   white-space: nowrap;
 }
+
+/* Account dashboard */
+.account-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-card);
+}
+
+.account-header-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.account-header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-header-info h2 {
+  margin: 0 0 0.15rem;
+  font-size: 1.2rem;
+}
+
+.account-header-info p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.account-header-balance {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+.account-tabs {
+  display: flex;
+  gap: 0.4rem;
+  border-bottom: 1px solid var(--border-hairline);
+  overflow-x: auto;
+}
+
+.account-tab {
+  flex-shrink: 0;
+  padding: 0.6rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.account-tab:hover {
+  color: var(--text-primary);
+}
+
+.account-tab.active {
+  color: #6366f1;
+  border-bottom-color: #6366f1;
+}
