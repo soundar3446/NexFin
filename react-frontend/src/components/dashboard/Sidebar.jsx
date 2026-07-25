@@ -7,9 +7,9 @@ const NAV_ITEMS = [
   { to: '/insights', label: 'Insights', icon: '📊' },
 ]
 
-function Sidebar() {
+function Sidebar({ collapsed, onToggleCollapse }) {
   return (
-    <aside className="app-sidebar">
+    <aside className={`app-sidebar${collapsed ? ' collapsed' : ''}`}>
       <div className="app-sidebar-brand">
         <span className="login-logo">N</span>
       </div>
@@ -21,13 +21,23 @@ function Sidebar() {
             to={item.to}
             end={item.end}
             className={({ isActive }) => `app-nav-link${isActive ? ' active' : ''}`}
-            title={item.label}
+            title={collapsed ? item.label : undefined}
           >
             <span className="app-nav-icon">{item.icon}</span>
-            {item.label}
+            <span className="app-nav-label">{item.label}</span>
           </NavLink>
         ))}
       </nav>
+
+      <button
+        type="button"
+        className="sidebar-collapse-btn"
+        onClick={onToggleCollapse}
+        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      >
+        {collapsed ? '»' : '«'}
+      </button>
     </aside>
   )
 }

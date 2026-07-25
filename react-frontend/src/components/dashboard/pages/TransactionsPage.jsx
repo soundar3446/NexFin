@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
 import { useDashboardData } from '../../../context/DashboardDataContext'
 import { categorizeTransaction } from '../../../utils/categories'
+import { SkeletonList } from '../shared/Skeletons'
 import TransactionFilters from '../shared/TransactionFilters'
 import TransactionRow from '../shared/TransactionRow'
-import { EmptyState, ErrorState, LoadingState } from '../shared/States'
+import { EmptyState, ErrorState } from '../shared/States'
 
 const DEFAULT_FILTERS = {
   search: '',

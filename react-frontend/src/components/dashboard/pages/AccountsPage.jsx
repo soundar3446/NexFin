@@ -1,6 +1,7 @@
 import { useDashboardData } from '../../../context/DashboardDataContext'
 import AccountCard from '../shared/AccountCard'
-import { EmptyState, ErrorState, LoadingState } from '../shared/States'
+import { SkeletonCardGrid } from '../shared/Skeletons'
+import { EmptyState, ErrorState } from '../shared/States'
 import { formatAmount } from '../../../utils/format'
 
 function groupByNickname(accounts) {
@@ -16,7 +17,13 @@ function groupByNickname(accounts) {
 function AccountsPage() {
   const { accounts, loading, error } = useDashboardData()
 
-  if (loading) return <LoadingState label="Loading your accounts..." />
+  if (loading) {
+    return (
+      <div className="page">
+        <SkeletonCardGrid count={6} />
+      </div>
+    )
+  }
   if (error) return <ErrorState message={error} />
 
   if (accounts.length === 0) {

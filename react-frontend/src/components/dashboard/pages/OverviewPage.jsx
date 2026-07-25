@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useDashboardData } from '../../../context/DashboardDataContext'
 import AccountCard from '../shared/AccountCard'
-import { EmptyState, ErrorState, LoadingState } from '../shared/States'
+import { SkeletonCardGrid, SkeletonList, SkeletonStatRow } from '../shared/Skeletons'
+import { EmptyState, ErrorState } from '../shared/States'
 import StatCard from '../shared/StatCard'
 import TransactionRow from '../shared/TransactionRow'
 import { formatAmount } from '../../../utils/format'
@@ -15,7 +16,15 @@ function isThisMonth(isoString) {
 function OverviewPage() {
   const { accounts, transactions, loading, error } = useDashboardData()
 
-  if (loading) return <LoadingState label="Loading your accounts..." />
+  if (loading) {
+    return (
+      <div className="page">
+        <SkeletonStatRow />
+        <SkeletonCardGrid count={4} />
+        <SkeletonList rows={5} />
+      </div>
+    )
+  }
   if (error) return <ErrorState message={error} />
 
   const totalBalance = accounts.reduce(
