@@ -4,6 +4,7 @@ import { getFinancialHealth, getMonthlySpending, syncAccounts } from '../../../a
 import { formatAmount, monthLabel } from '../../../utils/format'
 import CategoryBarChart from '../shared/charts/CategoryBarChart'
 import IncomeExpenseChart from '../shared/charts/IncomeExpenseChart'
+import MonthNavigator from '../shared/MonthNavigator'
 import { SkeletonList, SkeletonStatRow } from '../shared/Skeletons'
 import { EmptyState, ErrorState } from '../shared/States'
 import StatCard from '../shared/StatCard'
@@ -74,18 +75,11 @@ function InsightsPage() {
         </button>
       </header>
 
-      <div className="month-tabs">
-        {months.map((m) => (
-          <button
-            key={m.month}
-            type="button"
-            className={`month-tab${m.month === current.month ? ' active' : ''}`}
-            onClick={() => setSelectedMonth(m.month)}
-          >
-            {monthLabel(m.month)}
-          </button>
-        ))}
-      </div>
+      <MonthNavigator
+        months={months.map((m) => m.month)}
+        selected={current.month}
+        onChange={setSelectedMonth}
+      />
 
       <section className="stat-row">
         <StatCard
