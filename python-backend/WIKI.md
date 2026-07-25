@@ -69,12 +69,18 @@ flowchart TD
 | | |
 |---|---|
 | `POST /auth/login` | No auth (this *is* the auth). Body: `{username, password}` (`schemas.LoginRequest`). |
+| `POST /auth/refresh` | No auth. Body: `{refresh_token}` (`schemas.RefreshRequest`). |
 
-**Flow:** builds an OAuth2 **password grant** form body (`client_id`/`client_secret` from `Settings`, plus the caller's `username`/`password`, `grant_type=password`) and POSTs it directly to `settings.auth_token_url` (Keycloak) via `httpx.AsyncClient`. Returns Keycloak's token response verbatim, validated against `schemas.TokenResponse` (`access_token`, `expires_in`, `refresh_token`, `refresh_expires_in`, `token_type`, `scope`).
+**Shared helper — `_exchange_token(form: dict) -> dict`:** both routes POST a form body to `settings.auth_token_url` (Keycloak) via a fresh `httpx.AsyncClient(timeout=Timeout(30.0, connect=10.0))` and return the JSON response verbatim, validated against `schemas.TokenResponse` (`access_token`, `expires_in`, `refresh_token`, `refresh_expires_in`, `token_type`, `scope`). They differ only in the form body's `grant_type` and credentials:
 
-**Errors:** `500` if `auth_token_url`/`auth_client_id` aren't configured; `401` if Keycloak rejects the credentials (any non-200 from Keycloak is collapsed to a generic 401, not passed through raw).
+- **`login`**: `grant_type=password` with `client_id`/`client_secret` (from `Settings`) plus the caller's `username`/`password`.
+- **`refresh`**: `grant_type=refresh_token` with `client_id`/`client_secret` plus the caller's `refresh_token`. Keycloak issues a **new** access/refresh token pair each time — the old refresh token isn't reusable afterward, so the caller must persist whatever comes back, not the one it sent in.
 
-**Nothing is persisted here** — no session, no refresh-token storage. The client is expected to hold the token and send it as `Authorization: Bearer <token>` on every subsequent request.
+**Errors:** `500` if `auth_token_url`/`auth_client_id` aren't configured; `504`/`502` if the request to Keycloak itself times out or fails to connect; `401` if Keycloak rejects the credentials or refresh token (any other non-200 from Keycloak is collapsed to a generic 401, not passed through raw — the message differs slightly: "Invalid credentials" for login, "Invalid or expired refresh token" for refresh).
+
+**Background sync on login:** if `login` gets an `access_token` back, it schedules `_sync_after_login(db, authorization)` via FastAPI's `BackgroundTasks` — runs *after* the response is already sent to the client, so login latency is unaffected. That helper resolves the token's `sub` via `get_current_user_sub` and calls `sync_accounts_and_transactions` (same function `/sync/accounts` uses), wrapped in a bare `try/except Exception: pass` — a failed background sync must never surface as a broken login; the Insights page still does its own sync before reading analysis data as a safety net. `refresh` does not trigger this — only a fresh login does.
+
+**Token storage:** the backend itself never persists an access or refresh token anywhere (not in Postgres, not in memory beyond the request/background-task that's using it). The client is expected to hold both and send the access token as `Authorization: Bearer <token>` on every subsequent request, calling `/auth/refresh` with the stored refresh token once the access token expires (5 minutes in this sandbox) rather than forcing a full re-login.
 
 ### Items — `app/routers/items.py`
 

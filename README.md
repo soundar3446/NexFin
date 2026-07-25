@@ -1,20 +1,50 @@
 # NexFin
 
-FastAPI backend + React (Vite) frontend, with Postgres.
+Open Banking account aggregation with AI-assisted spend analysis: connect a bank account via Open Banking, sync its transactions, and get monthly spending breakdowns, financial-health observations, and AI-generated insights — with a rule-based fallback for everything the AI produces, so nothing breaks silently if the model is unavailable.
 
-Stores and analyses Open Banking data — see [PRIVACY.md](PRIVACY.md) for the legal basis (PSD2/GDPR) and data model plan before adding any customer-data storage.
+## Features
 
-## Run everything with Docker
+- **Login** via Keycloak (OAuth2 password grant) against an Open Banking sandbox, with a one-time data-usage notice on first login.
+- **Live account access** — accounts, balances, and transactions proxied straight from the bank's Open Banking API (OBIE AISP v4.0).
+- **Sync to Postgres** — a local copy of accounts and full transaction history, fetched concurrently per account, so analysis doesn't have to hit the bank on every request.
+- **Monthly spending analysis** — totals, pending-vs-settled split, and breakdowns by category, merchant, and account.
+- **Financial health observations** — spend-vs-income ratio, month-over-month trend, category concentration, each independently flagged good/info/warning.
+- **AI-powered insights** — category breakdown, income/expense trend, and unusual-spending (anomaly) detection, each with a plain-English summary from an LLM and a templated fallback sentence if the model isn't reachable. Transaction categorization itself falls back to merchant-keyword and merchant-category-code rules.
+- **Anomaly detection** — flags unusually large transactions relative to their category's typical spend, and duplicate charges from the same merchant within 24 hours.
+- **React dashboard** — overview, accounts, per-account detail (overview/transactions/insights), transactions, and insights pages, with light/dark theme support.
+
+## Architecture
+
+A React client talks to one FastAPI backend, which is the only thing that touches the database or calls out to external services (Keycloak for login, the bank's core-api for account data, Hugging Face for AI insights).
+
+**[View the architecture diagram →](https://claude.ai/code/artifact/5bb54336-24fb-4665-b067-7762e60242dc)**
+
+For how a specific endpoint calculates its results, see [ENDPOINTS.md](ENDPOINTS.md). For the code-level implementation and service layer, see [python-backend/WIKI.md](python-backend/WIKI.md). For the legal/data-handling rationale (PSD2/GDPR) behind what gets stored, see [PRIVACY.md](PRIVACY.md).
+
+## Tech stack
+
+| | |
+|---|---|
+| Backend | FastAPI, SQLAlchemy, PostgreSQL, httpx |
+| Auth | Keycloak (OAuth2 password grant), PyJWT (reading claims only) |
+| Banking data | Open Banking core-api (OBIE AISP v4.0) |
+| AI | Hugging Face inference API (categorization + narrative insights) |
+| Frontend | React + Vite, React Router |
+| Infra | Docker Compose |
+
+## Getting started
+
+### Run everything with Docker
 
 ```
 docker compose up --build
 ```
 
 - Frontend: http://localhost:5173
-- Backend: http://localhost:8000 (docs at /docs)
+- Backend: http://localhost:8000 (docs at `/docs`)
 - Postgres: localhost:5432 (user/pass/db: `nexfin`)
 
-## Run locally without Docker
+### Run locally without Docker
 
 Backend (requires Python 3.10+):
 
@@ -37,15 +67,13 @@ npm run dev
 
 ## Endpoints
 
-Interactive docs (Swagger UI) are also available at `/docs` once the backend is running. A Postman collection covering all of these lives at `python-backend/NexFin-Backend.postman_collection.json`. For the logic behind each endpoint — what's calculated and how, no code — see [ENDPOINTS.md](ENDPOINTS.md). For how each endpoint works internally and the service layer underneath it, see [python-backend/WIKI.md](python-backend/WIKI.md).
+Interactive docs (Swagger UI) are available at `/docs` once the backend is running. A Postman collection covering the backend directly lives at `python-backend/NexFin-Backend.postman_collection.json`.
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
 | GET | `/health` | — | Liveness check |
-| POST | `/auth/login` | — | Exchanges `{username, password}` for a Keycloak token (password grant), using `AUTH_CLIENT_ID`/`AUTH_CLIENT_SECRET` from env |
-| GET | `/items/` | — | List items |
-| POST | `/items/` | — | Create an item |
-| GET | `/items/{item_id}` | — | Get an item by id (404 if missing) |
+| POST | `/auth/login` | — | Exchanges `{username, password}` for a Keycloak token (password grant), using `AUTH_CLIENT_ID`/`AUTH_CLIENT_SECRET` from env. Access tokens are short-lived (5 min in the sandbox) — also kicks off a background sync of the caller's accounts/transactions |
+| POST | `/auth/refresh` | — | Exchanges `{refresh_token}` for a new access/refresh token pair (Keycloak refresh-token grant), without requiring the username/password again |
 | GET | `/accounts?type=` | Bearer | Proxies to core-api: list accounts (optional `type` filter, e.g. `domestic`) |
 | GET | `/accounts/{account_id}` | Bearer | Proxies to core-api: single account |
 | GET | `/accounts/{account_id}/balances` | Bearer | Proxies to core-api: account balances |
@@ -56,5 +84,14 @@ Interactive docs (Swagger UI) are also available at `/docs` once the backend is 
 | POST | `/sync/accounts` | Bearer | Pulls the caller's accounts + all transactions from core-api and upserts them into the DB (see [PRIVACY.md](PRIVACY.md) for exactly which fields are stored and why) |
 | GET | `/analysis/monthly-spending` | Bearer | Reads the caller's stored transactions and returns per-month spend/income totals (with a pending vs. settled breakdown) plus category, merchant, and per-account breakdowns |
 | GET | `/analysis/financial-health` | Bearer | Per-month observations derived from the same stored transactions: spend-vs-income ratio, month-over-month spending trend, and category concentration (each flagged `good`/`info`/`warning`) |
+| GET | `/insights/category-breakdown?months=` | Bearer | AI-categorized spend by category over a rolling window, with a plain-English summary |
+| GET | `/insights/income-expense-trend?months=` | >Bearer | Monthly income/expense/net trend with averages and savings rate, with a plain-English summary |
+| GET | `/insights/unusual-spending?months=` | Bearer | Flags unusually large transactions and duplicate charges, with a plain-English summary |
 
-"Bearer" means the request needs an `Authorization: Bearer <token>` header — get a token from `/auth/login` first. For the `/accounts/*` routes the token is forwarded as-is to core-api; for `/me/notice*`, `/sync/*`, and `/analysis/*` the backend reads the token's `sub` claim to identify the user (signature isn't verified there — core-api independently verifies the token on every real data request). Run `/sync/accounts` before calling `/analysis/monthly-spending` — the analysis endpoint only reads what's already been synced into the DB, it doesn't hit core-api itself.
+"Bearer" means the request needs an `Authorization: Bearer <token>` header — get a token from `/auth/login` first. For the `/accounts/*` routes the token is forwarded as-is to core-api; for `/me/notice*`, `/sync/*`, `/analysis/*`, and `/insights/*` the backend reads the token's `sub` claim to identify the user (signature isn't verified there — core-api independently verifies the token on every real data request). Run `/sync/accounts` before calling `/analysis/*` or `/insights/*` — those endpoints only read what's already been synced into the DB, they don't hit core-api themselves.
+
+## Documentation
+
+- **[ENDPOINTS.md](ENDPOINTS.md)** — the logic behind each endpoint: what's calculated and how, no code.
+- **[python-backend/WIKI.md](python-backend/WIKI.md)** — code-level implementation and the service layer underneath each endpoint.
+- **[PRIVACY.md](PRIVACY.md)** — the legal basis (PSD2/GDPR) and data model rationale for what gets stored.

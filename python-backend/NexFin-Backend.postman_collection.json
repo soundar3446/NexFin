@@ -9,6 +9,7 @@
     { "key": "username", "value": "" },
     { "key": "password", "value": "" },
     { "key": "access_token", "value": "" },
+    { "key": "refresh_token", "value": "" },
     { "key": "account_id", "value": "6a61fde1c47905bfc3f19571" },
     { "key": "item_id", "value": "" }
   ],
@@ -65,8 +66,72 @@
                   "    console.log('access_token saved to collection variables');",
                   "} else {",
                   "    console.warn('access_token not found in login response');",
+                  "}",
+                  "if (jsonData && jsonData.refresh_token) {",
+                  "    pm.collectionVariables.set('refresh_token', jsonData.refresh_token);",
                   "}"
                 ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/auth/refresh", "host": ["{{base_url}}"], "path": ["auth", "refresh"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "let jsonData;",
+                  "try { jsonData = pm.response.json(); } catch (e) { jsonData = null; }",
+                  "pm.test('returns a new access_token', () => pm.expect(jsonData).to.have.property('access_token'));",
+                  "if (jsonData && jsonData.access_token) {",
+                  "    pm.collectionVariables.set('access_token', jsonData.access_token);",
+                  "}",
+                  "if (jsonData && jsonData.refresh_token) {",
+                  "    pm.collectionVariables.set('refresh_token', jsonData.refresh_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh - Invalid Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"not-a-real-token\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/auth/refresh", "host": ["{{base_url}}"], "path": ["auth", "refresh"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status code is 401', () => pm.response.to.have.status(401));"]
               }
             }
           ]

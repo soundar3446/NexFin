@@ -3,6 +3,7 @@ from collections import defaultdict
 from datetime import timedelta
 
 from app import models
+from app.merchant_utils import clean_merchant_name
 
 _CATEGORY_MIN_SAMPLES = 3
 _MODIFIED_Z_THRESHOLD = 3.5  # standard Iglewicz & Hoaglin robust-outlier threshold
@@ -78,7 +79,7 @@ def _flag_category_outliers(flags: dict, debit_txns: list[models.Transaction]) -
 def _flag_duplicate_charges(flags: dict, debit_txns: list[models.Transaction]) -> None:
     groups = defaultdict(list)
     for txn in debit_txns:
-        merchant_key = (txn.merchant_name or txn.transaction_information or "").strip().lower()
+        merchant_key = (clean_merchant_name(txn.merchant_name) or txn.transaction_information or "").strip().lower()
         if not merchant_key:
             continue
         groups[(merchant_key, float(txn.amount))].append(txn)
@@ -91,7 +92,7 @@ def _flag_duplicate_charges(flags: dict, debit_txns: list[models.Transaction]) -
             if curr.booking_datetime - prev.booking_datetime <= _DUPLICATE_WINDOW:
                 reason = (
                     f"Same amount ({amount:.2f}) charged by "
-                    f"{(curr.merchant_name or merchant_key).title()} within 24 hours of another transaction."
+                    f"{(clean_merchant_name(curr.merchant_name) or merchant_key).title()} within 24 hours of another transaction."
                 )
                 _flag(flags, curr, reason, "medium")
                 _flag(flags, prev, reason, "medium")
@@ -110,7 +111,7 @@ def detect_unusual_spending(transactions: list[models.Transaction]) -> list[dict
         {
             "transaction_id": entry["txn"].transaction_id,
             "booking_date": entry["txn"].booking_datetime.strftime("%Y-%m-%d"),
-            "merchant": entry["txn"].merchant_name,
+            "merchant": clean_merchant_name(entry["txn"].merchant_name),
             "category": entry["txn"].category or "Other Expense",
             "amount": round(float(entry["txn"].amount), 2),
             "reason": " ".join(entry["reasons"]),

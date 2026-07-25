@@ -65,7 +65,7 @@ def _contains_keyword(text: str, keyword: str) -> bool:
     return re.search(rf"\b{re.escape(keyword.strip())}\b", text) is not None
 
 
-def _fallback_category(txn: models.Transaction) -> str:
+def fallback_category(txn: models.Transaction) -> str:
     text = f"{txn.transaction_information or ''} {txn.merchant_name or ''}".lower()
     rules = _EXPENSE_KEYWORD_RULES if txn.credit_debit_indicator == "Debit" else _INCOME_KEYWORD_RULES
 
@@ -133,7 +133,7 @@ async def _categorize_batch(batch: list[models.Transaction]) -> None:
             txn.category = category
             txn.category_source = "ai"
         else:
-            txn.category = _fallback_category(txn)
+            txn.category = fallback_category(txn)
             txn.category_source = "fallback"
 
 

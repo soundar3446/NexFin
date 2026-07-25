@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.auth_utils import get_current_user_sub
+from app.categorizer import fallback_category
 from app.database import get_db
-from app.mcc_categories import category_for_mcc
+from app.merchant_utils import clean_merchant_name
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
@@ -54,9 +55,9 @@ def _compute_monthly_summaries(db: Session, user_sub: str) -> list[schemas.Month
             account_bucket["total_spend"] += amount
             if is_pending:
                 bucket["pending_spend"] += amount
-            category = category_for_mcc(txn.merchant_category_code) or "Uncategorised"
+            category = txn.category or fallback_category(txn)
             bucket["by_category"][category] += amount
-            bucket["by_merchant"][txn.merchant_name or "Unknown"] += amount
+            bucket["by_merchant"][clean_merchant_name(txn.merchant_name) or "Unknown"] += amount
         else:
             bucket["total_income"] += amount
             account_bucket["total_income"] += amount
