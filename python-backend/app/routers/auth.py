@@ -20,8 +20,13 @@ async def login(payload: schemas.LoginRequest):
         "grant_type": "password",
     }
 
-    async with httpx.AsyncClient() as client:
-        response = await client.post(settings.auth_token_url, data=form)
+    try:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(30.0, connect=10.0)) as client:
+            response = await client.post(settings.auth_token_url, data=form)
+    except httpx.TimeoutException as exc:
+        raise HTTPException(status_code=504, detail=f"Auth server request timed out: {exc}") from exc
+    except httpx.RequestError as exc:
+        raise HTTPException(status_code=502, detail=f"Auth server request failed: {exc}") from exc
 
     if response.status_code != 200:
         raise HTTPException(status_code=401, detail="Invalid credentials")
