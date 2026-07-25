@@ -73,3 +73,21 @@ async def income_expense_trend_insight(
         f"On average you brought in {average_income:.2f} and spent {average_expense:.2f} per month, "
         f"{direction} at a rate of {average_savings_rate:.1f}% of income."
     ), "fallback"
+
+
+async def unusual_spending_insight(anomalies: list[dict], period_months: int) -> tuple[str, str]:
+    if not anomalies:
+        return "No unusual spending detected in this period.", "fallback"
+
+    text, source = await _generate(
+        json.dumps({"period_months": period_months, "anomalies": anomalies[:10]})
+    )
+    if text:
+        return text, source
+
+    top = anomalies[0]
+    return (
+        f"Found {len(anomalies)} unusual transaction(s) in the last {period_months} month(s). "
+        f"The most notable was {top['amount']:.2f} at {top.get('merchant') or 'an unknown merchant'} "
+        f"({top['category']})."
+    ), "fallback"

@@ -114,3 +114,20 @@ class IncomeExpenseTrendResponse(BaseModel):
     average_savings_rate: float
     insight: str
     insight_source: str
+
+
+class UnusualTransaction(BaseModel):
+    transaction_id: str
+    booking_date: str
+    merchant: str | None
+    category: str
+    amount: float
+    reason: str
+    severity: str
+
+
+class UnusualSpendingResponse(BaseModel):
+    period_months: int
+    anomalies: list[UnusualTransaction]
+    insight: str
+    insight_source: str

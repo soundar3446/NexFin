@@ -5,10 +5,15 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app import models, schemas
+from app.anomaly_detector import detect_unusual_spending
 from app.auth_utils import get_current_user_sub
 from app.categorizer import categorize_transactions
 from app.database import get_db
-from app.narratives import category_breakdown_insight, income_expense_trend_insight
+from app.narratives import (
+    category_breakdown_insight,
+    income_expense_trend_insight,
+    unusual_spending_insight,
+)
 
 router = APIRouter(prefix="/insights", tags=["insights"])
 
@@ -124,6 +129,29 @@ async def income_expense_trend(
         average_income=round(average_income, 2),
         average_expense=round(average_expense, 2),
         average_savings_rate=round(average_savings_rate, 1),
+        insight=insight,
+        insight_source=source,
+    )
+
+
+@router.get("/unusual-spending", response_model=schemas.UnusualSpendingResponse)
+async def unusual_spending(
+    months: int = Query(default=3, ge=1, le=24),
+    user_sub: str = Depends(get_current_user_sub),
+    db: Session = Depends(get_db),
+):
+    cutoff = _months_ago(months)
+    transactions = _user_transactions(db, user_sub, cutoff)
+    expense_txns = [txn for txn in transactions if txn.credit_debit_indicator == "Debit"]
+
+    await categorize_transactions(db, expense_txns)
+
+    anomalies = detect_unusual_spending(transactions)
+    insight, source = await unusual_spending_insight(anomalies, months)
+
+    return schemas.UnusualSpendingResponse(
+        period_months=months,
+        anomalies=[schemas.UnusualTransaction(**anomaly) for anomaly in anomalies],
         insight=insight,
         insight_source=source,
     )
