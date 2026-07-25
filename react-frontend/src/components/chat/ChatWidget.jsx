@@ -6,8 +6,8 @@ import { formatMoneyExact, formatDate } from '../../utils/format'
 const SUGGESTIONS = [
   'Show my recent transactions',
   'How much did I spend this month?',
+  'Monthly summary for my Bills account',
   'Any subscriptions?',
-  'What accounts do I have?',
 ]
 
 function accountIdFromPath(pathname) {
@@ -55,9 +55,14 @@ function ChatAccountCard({ account }) {
 function ChatSpendSummaryCard({ summary }) {
   if (!summary) return null
   const currency = summary.currency || 'GBP'
+  const scopeLabel =
+    summary.nickname ||
+    summary.account_nickname ||
+    (summary.match_count > 1 ? `${summary.match_count} accounts` : null)
 
   return (
     <div className="chat-summary-card">
+      {scopeLabel ? <p className="chat-summary-scope">Scoped to {scopeLabel}</p> : null}
       <div className="chat-summary-totals">
         <div>
           <span className="chat-summary-label">Spent</span>

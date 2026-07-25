@@ -2087,6 +2087,12 @@ body {
   gap: 0.55rem;
 }
 
+.chat-summary-scope {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
 .chat-summary-totals {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

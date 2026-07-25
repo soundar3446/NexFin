@@ -15,6 +15,20 @@ DEFAULT_LIMIT = 5
 MAX_LIMIT = 20
 MONEY_QUANT = Decimal("0.01")
 
+_ACCOUNT_ID_PROP = {
+    "type": "string",
+    "description": "Optional account ID to restrict results to one account.",
+}
+_ACCOUNT_NICKNAME_PROP = {
+    "type": "string",
+    "description": (
+        "Optional account nickname/name (e.g. Bills, Savings, Emergency). "
+        "Case-insensitive exact match. If several accounts share the nickname, "
+        "all of them are included. Prefer this when the user names an account "
+        "instead of an ID."
+    ),
+}
+
 
 def _as_decimal(value) -> Decimal:
     if isinstance(value, Decimal):
@@ -50,15 +64,14 @@ TOOL_DEFINITIONS = [
             "name": "get_recent_transactions",
             "description": (
                 "Fetch the most recent transactions for the user, newest first. "
-                "Use for 'recent transactions', 'latest payments', or 'what did I spend lately'."
+                "Use for 'recent transactions', 'latest payments', or 'what did I spend lately'. "
+                "Pass account_nickname when the user names an account (e.g. Bills)."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "account_id": {
-                        "type": "string",
-                        "description": "Optional account ID. If omitted, search across all of the user's accounts.",
-                    },
+                    "account_id": _ACCOUNT_ID_PROP,
+                    "account_nickname": _ACCOUNT_NICKNAME_PROP,
                     "limit": {
                         "type": "integer",
                         "description": f"How many transactions to return (1-{MAX_LIMIT}). Default {DEFAULT_LIMIT}.",
@@ -77,7 +90,8 @@ TOOL_DEFINITIONS = [
             "description": (
                 "Search the user's transactions by merchant name or description text "
                 "(e.g. Netflix, gas, rent, Tesco). Use when the user asks whether they "
-                "paid a merchant, or to find specific purchases."
+                "paid a merchant, or to find specific purchases. Optionally restrict to "
+                "an account via account_nickname or account_id."
             ),
             "parameters": {
                 "type": "object",
@@ -86,10 +100,8 @@ TOOL_DEFINITIONS = [
                         "type": "string",
                         "description": "Search text matched against merchant_name and transaction_information.",
                     },
-                    "account_id": {
-                        "type": "string",
-                        "description": "Optional account ID to restrict the search.",
-                    },
+                    "account_id": _ACCOUNT_ID_PROP,
+                    "account_nickname": _ACCOUNT_NICKNAME_PROP,
                     "limit": {
                         "type": "integer",
                         "description": f"Max matches to return (1-{MAX_LIMIT}). Default {DEFAULT_LIMIT}.",
@@ -109,7 +121,9 @@ TOOL_DEFINITIONS = [
             "description": (
                 "Summarise spending and income for a calendar month: totals, top categories, "
                 "and top merchants. Use for 'how much did I spend this month', "
-                "'income vs expenses', or 'where is my money going'."
+                "'income vs expenses', 'where is my money going', or "
+                "'monthly summary for my Bills account'. Pass account_nickname when the "
+                "user names an account."
             ),
             "parameters": {
                 "type": "object",
@@ -118,10 +132,8 @@ TOOL_DEFINITIONS = [
                         "type": "string",
                         "description": "Month as YYYY-MM. Defaults to the current UTC month.",
                     },
-                    "account_id": {
-                        "type": "string",
-                        "description": "Optional account ID to summarise a single account.",
-                    },
+                    "account_id": _ACCOUNT_ID_PROP,
+                    "account_nickname": _ACCOUNT_NICKNAME_PROP,
                 },
                 "additionalProperties": False,
             },
@@ -134,15 +146,14 @@ TOOL_DEFINITIONS = [
             "description": (
                 "Detect likely recurring payments / subscriptions by finding merchants or "
                 "descriptions that appear multiple times with similar debit amounts. "
-                "Use for 'any subscriptions', 'recurring charges', or 'what am I paying monthly'."
+                "Use for 'any subscriptions', 'recurring charges', or 'what am I paying monthly'. "
+                "Pass account_nickname to limit to a named account."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "account_id": {
-                        "type": "string",
-                        "description": "Optional account ID to restrict detection.",
-                    },
+                    "account_id": _ACCOUNT_ID_PROP,
+                    "account_nickname": _ACCOUNT_NICKNAME_PROP,
                     "lookback_days": {
                         "type": "integer",
                         "description": "How many days of history to scan (7-365). Default 90.",
@@ -170,9 +181,14 @@ def _user_accounts(db: Session, user_sub: str) -> list[models.Account]:
 def _resolve_account_scope(
     db: Session,
     user_sub: str,
-    account_id: str | None,
-) -> tuple[dict[str, str | None], list[str]]:
-    """Return (nickname_map, account_ids) for the user, optionally filtered."""
+    account_id: str | None = None,
+    account_nickname: str | None = None,
+) -> tuple[dict[str, str | None], list[str], list[dict]]:
+    """Return (nickname_map, account_ids, matched_accounts).
+
+    Priority: explicit account_id > account_nickname > all user accounts.
+    Nickname match is case-insensitive exact; multiple matches are all included.
+    """
     accounts = _user_accounts(db, user_sub)
     if not accounts:
         total = db.query(models.Account).count()
@@ -181,10 +197,10 @@ def _resolve_account_scope(
             user_sub,
             total,
         )
-        return {}, []
+        return {}, [], []
 
     nicknames = {a.account_id: a.nickname for a in accounts}
-    account_ids = list(nicknames.keys())
+    all_ids = list(nicknames.keys())
 
     if account_id is not None:
         if account_id not in nicknames:
@@ -192,12 +208,43 @@ def _resolve_account_scope(
                 "account_id=%s not owned by user_sub=%s (owned=%s)",
                 account_id,
                 user_sub,
-                account_ids,
+                all_ids,
             )
-            return nicknames, []
-        return nicknames, [account_id]
+            return nicknames, [], []
+        matched = [
+            {
+                "account_id": account_id,
+                "nickname": nicknames.get(account_id),
+            }
+        ]
+        return nicknames, [account_id], matched
 
-    return nicknames, account_ids
+    if account_nickname:
+        needle = account_nickname.strip().casefold()
+        matched_accounts = [
+            a for a in accounts if (a.nickname or "").strip().casefold() == needle
+        ]
+        if not matched_accounts:
+            logger.warning(
+                "account_nickname=%r matched 0 accounts for user_sub=%s",
+                account_nickname,
+                user_sub,
+            )
+            return nicknames, [], []
+        matched_ids = [a.account_id for a in matched_accounts]
+        matched = [
+            {"account_id": a.account_id, "nickname": a.nickname} for a in matched_accounts
+        ]
+        logger.info(
+            "account_nickname=%r matched %s account(s): %s",
+            account_nickname,
+            len(matched_ids),
+            matched_ids,
+        )
+        return nicknames, matched_ids, matched
+
+    matched = [{"account_id": a.account_id, "nickname": a.nickname} for a in accounts]
+    return nicknames, all_ids, matched
 
 
 def _txn_category(txn: models.Transaction) -> str:
@@ -243,17 +290,21 @@ def get_recent_transactions(
     db: Session,
     user_sub: str,
     account_id: str | None = None,
+    account_nickname: str | None = None,
     limit: int | None = None,
 ) -> list[dict]:
     resolved_limit = _clamp_limit(limit)
     logger.info(
-        "get_recent_transactions start user_sub=%s account_id=%s limit=%s",
+        "get_recent_transactions start user_sub=%s account_id=%s account_nickname=%r limit=%s",
         user_sub,
         account_id,
+        account_nickname,
         resolved_limit,
     )
 
-    nicknames, account_ids = _resolve_account_scope(db, user_sub, account_id)
+    nicknames, account_ids, _matched = _resolve_account_scope(
+        db, user_sub, account_id=account_id, account_nickname=account_nickname
+    )
     if not account_ids:
         return []
 
@@ -273,21 +324,25 @@ def find_transactions(
     user_sub: str,
     query: str,
     account_id: str | None = None,
+    account_nickname: str | None = None,
     limit: int | None = None,
 ) -> list[dict]:
     resolved_limit = _clamp_limit(limit)
     needle = (query or "").strip()
     logger.info(
-        "find_transactions start user_sub=%s query=%r account_id=%s limit=%s",
+        "find_transactions start user_sub=%s query=%r account_id=%s account_nickname=%r limit=%s",
         user_sub,
         needle,
         account_id,
+        account_nickname,
         resolved_limit,
     )
     if not needle:
         return []
 
-    nicknames, account_ids = _resolve_account_scope(db, user_sub, account_id)
+    nicknames, account_ids, _matched = _resolve_account_scope(
+        db, user_sub, account_id=account_id, account_nickname=account_nickname
+    )
     if not account_ids:
         return []
 
@@ -314,6 +369,7 @@ def spend_summary(
     user_sub: str,
     month: str | None = None,
     account_id: str | None = None,
+    account_nickname: str | None = None,
 ) -> dict:
     if month:
         try:
@@ -324,17 +380,29 @@ def spend_summary(
         period = datetime.now(timezone.utc).strftime("%Y-%m")
 
     logger.info(
-        "spend_summary start user_sub=%s month=%s account_id=%s",
+        "spend_summary start user_sub=%s month=%s account_id=%s account_nickname=%r",
         user_sub,
         period,
         account_id,
+        account_nickname,
     )
 
-    nicknames, account_ids = _resolve_account_scope(db, user_sub, account_id)
+    nicknames, account_ids, matched = _resolve_account_scope(
+        db, user_sub, account_id=account_id, account_nickname=account_nickname
+    )
+    scope_label = None
+    if account_nickname:
+        scope_label = account_nickname.strip()
+    elif account_id:
+        scope_label = nicknames.get(account_id)
+
     empty = {
         "period": period,
         "account_id": account_id,
-        "nickname": nicknames.get(account_id) if account_id else None,
+        "account_nickname": account_nickname,
+        "nickname": scope_label,
+        "matched_accounts": matched,
+        "match_count": len(matched),
         "total_spend": "0.00",
         "total_income": "0.00",
         "net": "0.00",
@@ -382,7 +450,10 @@ def spend_summary(
     result = {
         "period": period,
         "account_id": account_id,
-        "nickname": nicknames.get(account_id) if account_id else None,
+        "account_nickname": account_nickname,
+        "nickname": scope_label,
+        "matched_accounts": matched if (account_id or account_nickname) else [],
+        "match_count": len(matched) if (account_id or account_nickname) else 0,
         "total_spend": _money(total_spend),
         "total_income": _money(total_income),
         "net": _money(total_income - total_spend),
@@ -398,11 +469,12 @@ def spend_summary(
         ],
     }
     logger.info(
-        "spend_summary period=%s spend=%s income=%s count=%s",
+        "spend_summary period=%s spend=%s income=%s count=%s match_count=%s",
         period,
         result["total_spend"],
         result["total_income"],
         result["transaction_count"],
+        result["match_count"],
     )
     return result
 
@@ -411,18 +483,22 @@ def detect_subscriptions(
     db: Session,
     user_sub: str,
     account_id: str | None = None,
+    account_nickname: str | None = None,
     lookback_days: int | None = None,
 ) -> list[dict]:
     days = 90 if lookback_days is None else max(7, min(int(lookback_days), 365))
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     logger.info(
-        "detect_subscriptions start user_sub=%s account_id=%s lookback_days=%s",
+        "detect_subscriptions start user_sub=%s account_id=%s account_nickname=%r lookback_days=%s",
         user_sub,
         account_id,
+        account_nickname,
         days,
     )
 
-    nicknames, account_ids = _resolve_account_scope(db, user_sub, account_id)
+    nicknames, account_ids, _matched = _resolve_account_scope(
+        db, user_sub, account_id=account_id, account_nickname=account_nickname
+    )
     if not account_ids:
         return []
 
@@ -483,13 +559,21 @@ def dispatch_tool(
     preferred_account_id: str | None = None,
 ) -> tuple[str, str, list | dict]:
     """Run a tool. Returns (tool_name, data_type, data)."""
-    account_id = arguments.get("account_id") or preferred_account_id
+    account_nickname = (arguments.get("account_nickname") or "").strip() or None
+    # Nickname from the user question wins over the page-scoped account_id.
+    if account_nickname:
+        account_id = arguments.get("account_id") or None
+    else:
+        account_id = arguments.get("account_id") or preferred_account_id
+
     logger.info(
-        "dispatch_tool name=%s args=%s preferred_account_id=%s resolved_account_id=%s",
+        "dispatch_tool name=%s args=%s preferred_account_id=%s "
+        "resolved_account_id=%s account_nickname=%r",
         name,
         arguments,
         preferred_account_id,
         account_id,
+        account_nickname,
     )
 
     if name == "list_accounts":
@@ -497,7 +581,11 @@ def dispatch_tool(
 
     if name == "get_recent_transactions":
         rows = get_recent_transactions(
-            db, user_sub, account_id=account_id, limit=arguments.get("limit")
+            db,
+            user_sub,
+            account_id=account_id,
+            account_nickname=account_nickname,
+            limit=arguments.get("limit"),
         )
         return name, "transactions", rows
 
@@ -507,6 +595,7 @@ def dispatch_tool(
             user_sub,
             query=arguments.get("query") or "",
             account_id=account_id,
+            account_nickname=account_nickname,
             limit=arguments.get("limit"),
         )
         return name, "transactions", rows
@@ -517,6 +606,7 @@ def dispatch_tool(
             user_sub,
             month=arguments.get("month"),
             account_id=account_id,
+            account_nickname=account_nickname,
         )
         return name, "spend_summary", summary
 
@@ -525,6 +615,7 @@ def dispatch_tool(
             db,
             user_sub,
             account_id=account_id,
+            account_nickname=account_nickname,
             lookback_days=arguments.get("lookback_days"),
         )
         return name, "subscriptions", rows
