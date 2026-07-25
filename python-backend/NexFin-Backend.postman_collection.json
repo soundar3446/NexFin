@@ -297,6 +297,75 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Notice",
+      "item": [
+        {
+          "name": "Get Notice Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/me/notice", "host": ["{{base_url}}"], "path": ["me", "notice"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('has acknowledged field', () => pm.expect(pm.response.json()).to.have.property('acknowledged'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Acknowledge Notice",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/me/notice/ack", "host": ["{{base_url}}"], "path": ["me", "notice", "ack"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('acknowledged is true', () => pm.expect(pm.response.json().acknowledged).to.eql(true));",
+                  "pm.test('acknowledged_at is set', () => pm.expect(pm.response.json().acknowledged_at).to.not.be.null);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Notice Status - Missing Auth Header",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/me/notice", "host": ["{{base_url}}"], "path": ["me", "notice"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status code is 422', () => pm.response.to.have.status(422));"]
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
