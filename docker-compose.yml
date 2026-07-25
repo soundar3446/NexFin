@@ -17,6 +17,8 @@ services:
 
   backend:
     build: ./python-backend
+    env_file:
+      - ./python-backend/.env
     environment:
       DATABASE_URL: postgresql+psycopg2://nexfin:nexfin@db:5432/nexfin
       CORS_ORIGINS: http://localhost:5173

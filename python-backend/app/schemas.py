@@ -17,3 +17,17 @@ class ItemOut(ItemBase):
 
     id: int
     created_at: datetime
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    expires_in: int | None = None
+    refresh_token: str | None = None
+    refresh_expires_in: int | None = None
+    token_type: str | None = None
+    scope: str | None = None
