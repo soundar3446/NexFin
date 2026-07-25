@@ -979,7 +979,14 @@ body {
 }
 
 .account-card-icon {
-  font-size: 1.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--surface-3);
+  color: #6366f1;
 }
 
 .account-badge {
@@ -1421,7 +1428,14 @@ body {
 }
 
 .account-header-icon {
-  font-size: 1.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--surface-3);
+  color: #6366f1;
   flex-shrink: 0;
 }
 
@@ -1449,30 +1463,33 @@ body {
   flex-shrink: 0;
 }
 
-.account-tabs {
+.tab-bar {
   display: flex;
   gap: 0.4rem;
   border-bottom: 1px solid var(--border-hairline);
   overflow-x: auto;
 }
 
-.account-tab {
+.tab-link {
   flex-shrink: 0;
   padding: 0.6rem 1rem;
   font-size: 0.88rem;
   font-weight: 500;
   color: var(--text-secondary);
   text-decoration: none;
+  background: none;
+  border: none;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
+  cursor: pointer;
   transition: color 0.15s ease, border-color 0.15s ease;
 }
 
-.account-tab:hover {
+.tab-link:hover {
   color: var(--text-primary);
 }
 
-.account-tab.active {
+.tab-link.active {
   color: #6366f1;
   border-bottom-color: #6366f1;
 }

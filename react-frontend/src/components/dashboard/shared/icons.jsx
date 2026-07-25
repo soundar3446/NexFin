@@ -65,6 +65,30 @@ export function ChevronRightIcon() {
   )
 }
 
+export function PiggyBankIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path
+        d="M4 13c0-3.5 2.9-6 6.8-6 2 0 3.6.6 4.7 1.6l2.5-.7-.6 2.3c.7.9 1.1 2 1.1 3.1 0 3.3-3.4 5.7-7.7 5.7S4 16.6 4 13Z"
+        strokeLinejoin="round"
+      />
+      <path d="M8.5 17.5 8 20M15 17.5l.5 2.5" strokeLinecap="round" />
+      <path d="M9.5 11h.01" strokeLinecap="round" />
+      <path d="M4 12.5 2 12" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function WalletIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M3.5 7.5A2 2 0 0 1 5.5 5.5h11a2 2 0 0 1 2 2v.5" strokeLinecap="round" />
+      <rect x="3.5" y="7.5" width="17" height="12" rx="2" />
+      <path d="M15.5 14a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
 export function AlertIcon() {
   return (
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -73,4 +97,19 @@ export function AlertIcon() {
       <circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none" />
     </svg>
   )
+}
+
+// Account Nickname -> icon component, shared by AccountCard and AccountLayout
+// so the same account always shows the same icon everywhere it appears.
+export const NICKNAME_ICONS = {
+  Bills: ReceiptIcon,
+  Household: HomeIcon,
+  Savings: PiggyBankIcon,
+  Everyday: WalletIcon,
+  Emergency: AlertIcon,
+}
+
+export function AccountNicknameIcon({ nickname }) {
+  const Icon = NICKNAME_ICONS[nickname] || WalletIcon
+  return <Icon />
 }

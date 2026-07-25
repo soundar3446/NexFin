@@ -1,24 +1,18 @@
 import { Link } from 'react-router-dom'
 import { formatAmount, formatDate } from '../../../utils/format'
-
-const NICKNAME_ICON = {
-  Bills: '🧾',
-  Household: '🏠',
-  Savings: '🐷',
-  Everyday: '💳',
-  Emergency: '🚨',
-}
+import { AccountNicknameIcon } from './icons'
 
 function AccountCard({ account }) {
   const balance = account.balance
-  const icon = NICKNAME_ICON[account.Nickname] || '💰'
   const holderName = account.Account?.[0]?.Name
 
   return (
     <Link to={`/accounts/${account.AccountId}`} className="account-card-link">
       <div className="account-card">
         <div className="account-card-top">
-          <span className="account-card-icon">{icon}</span>
+          <span className="account-card-icon">
+            <AccountNicknameIcon nickname={account.Nickname} />
+          </span>
           <span className={`account-badge ${account.InternationalAccount ? 'intl' : 'domestic'}`}>
             {account.InternationalAccount ? 'International' : 'Domestic'}
           </span>

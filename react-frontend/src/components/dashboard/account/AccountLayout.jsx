@@ -1,16 +1,9 @@
 import { Link, NavLink, Outlet, useParams } from 'react-router-dom'
 import { useDashboardData } from '../../../context/DashboardDataContext'
 import { formatAmount } from '../../../utils/format'
+import { AccountNicknameIcon } from '../shared/icons'
 import { SkeletonList } from '../shared/Skeletons'
 import { EmptyState } from '../shared/States'
-
-const NICKNAME_ICON = {
-  Bills: '🧾',
-  Household: '🏠',
-  Savings: '🐷',
-  Everyday: '💳',
-  Emergency: '🚨',
-}
 
 const TABS = [
   { to: '', label: 'Overview', end: true },
@@ -47,8 +40,6 @@ function AccountLayout() {
     )
   }
 
-  const icon = NICKNAME_ICON[account.Nickname] || '💰'
-
   return (
     <div className="page">
       <Link to="/accounts" className="link-btn">
@@ -56,7 +47,9 @@ function AccountLayout() {
       </Link>
 
       <header className="account-header">
-        <span className="account-header-icon">{icon}</span>
+        <span className="account-header-icon">
+          <AccountNicknameIcon nickname={account.Nickname} />
+        </span>
         <div className="account-header-info">
           <h2>{account.Nickname || account.Description || 'Account'}</h2>
           <p>
@@ -72,13 +65,13 @@ function AccountLayout() {
         </div>
       </header>
 
-      <nav className="account-tabs">
+      <nav className="tab-bar">
         {TABS.map((tab) => (
           <NavLink
             key={tab.label}
             to={`/accounts/${accountId}${tab.to ? `/${tab.to}` : ''}`}
             end={tab.end}
-            className={({ isActive }) => `account-tab${isActive ? ' active' : ''}`}
+            className={({ isActive }) => `tab-link${isActive ? ' active' : ''}`}
           >
             {tab.label}
           </NavLink>
