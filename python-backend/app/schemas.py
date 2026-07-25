@@ -82,3 +82,35 @@ class HealthObservation(BaseModel):
 class MonthlyHealthSummary(BaseModel):
     month: str
     observations: list[HealthObservation]
+
+
+class CategoryAmount(BaseModel):
+    category: str
+    total: float
+    percentage: float
+    transaction_count: int
+
+
+class CategoryBreakdownResponse(BaseModel):
+    period_months: int
+    total_expense: float
+    categories: list[CategoryAmount]
+    insight: str
+    insight_source: str
+
+
+class MonthlyIncomeExpense(BaseModel):
+    month: str
+    income: float
+    expense: float
+    net: float
+
+
+class IncomeExpenseTrendResponse(BaseModel):
+    period_months: int
+    months: list[MonthlyIncomeExpense]
+    average_income: float
+    average_expense: float
+    average_savings_rate: float
+    insight: str
+    insight_source: str

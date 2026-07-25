@@ -48,3 +48,5 @@ class Transaction(Base):
     merchant_category_code = Column(String, nullable=True)
     bank_transaction_code = Column(String, nullable=True)
     bank_transaction_sub_code = Column(String, nullable=True)
+    category = Column(String, nullable=True)
+    category_source = Column(String, nullable=True)
