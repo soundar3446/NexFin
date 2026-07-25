@@ -493,6 +493,7 @@
                   "        pm.expect(entry).to.have.property('pending_income');",
                   "        pm.expect(entry).to.have.property('by_category');",
                   "        pm.expect(entry).to.have.property('by_merchant');",
+                  "        pm.expect(entry).to.have.property('by_account');",
                   "    });",
                   "}"
                 ]
@@ -509,6 +510,67 @@
               "raw": "{{base_url}}/analysis/monthly-spending",
               "host": ["{{base_url}}"],
               "path": ["analysis", "monthly-spending"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status code is 422', () => pm.response.to.have.status(422));"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Financial Health",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analysis/financial-health",
+              "host": ["{{base_url}}"],
+              "path": ["analysis", "financial-health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('response is an array', () => pm.expect(pm.response.json()).to.be.an('array'));",
+                  "const body = pm.response.json();",
+                  "if (body.length > 0) {",
+                  "    pm.test('month entries have expected shape', () => {",
+                  "        const entry = body[0];",
+                  "        pm.expect(entry).to.have.property('month');",
+                  "        pm.expect(entry).to.have.property('observations');",
+                  "        pm.expect(entry.observations).to.be.an('array').that.is.not.empty;",
+                  "        const obs = entry.observations[0];",
+                  "        pm.expect(obs).to.have.property('type');",
+                  "        pm.expect(obs).to.have.property('severity');",
+                  "        pm.expect(obs).to.have.property('message');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Financial Health - Missing Auth Header",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/analysis/financial-health",
+              "host": ["{{base_url}}"],
+              "path": ["analysis", "financial-health"]
             }
           },
           "event": [

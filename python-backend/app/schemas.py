@@ -53,6 +53,14 @@ class MonthlyMerchantBreakdown(BaseModel):
     total: float
 
 
+class MonthlyAccountBreakdown(BaseModel):
+    account_id: str
+    nickname: str | None
+    total_spend: float
+    total_income: float
+    transaction_count: int
+
+
 class MonthlySpendSummary(BaseModel):
     month: str
     total_spend: float
@@ -62,3 +70,15 @@ class MonthlySpendSummary(BaseModel):
     transaction_count: int
     by_category: list[MonthlyCategoryBreakdown]
     by_merchant: list[MonthlyMerchantBreakdown]
+    by_account: list[MonthlyAccountBreakdown]
+
+
+class HealthObservation(BaseModel):
+    type: str
+    severity: str
+    message: str
+
+
+class MonthlyHealthSummary(BaseModel):
+    month: str
+    observations: list[HealthObservation]

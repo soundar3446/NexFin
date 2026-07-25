@@ -92,6 +92,7 @@ The OAuth access/refresh tokens themselves are never persisted — the backend o
 
 - `Account`/`Transaction` SQLAlchemy models (`app/models.py`)
 - `POST /sync/accounts` — pulls the current user's accounts + all transactions from core-api and upserts them into the DB, scoped to the caller's `user_sub`
-- `GET /analysis/monthly-spending` — reads the current user's stored transactions and returns per-month totals (spend, income, transaction count) plus category and merchant breakdowns
+- `GET /analysis/monthly-spending` — reads the current user's stored transactions and returns per-month totals (spend, income, transaction count) plus category, merchant, and per-account breakdowns
+- `GET /analysis/financial-health` — derived observations (spend-vs-income ratio, month-over-month trend, category concentration) computed at query time from the same stored transactions; nothing new is persisted for this feature
 
 If balance-trend/net-worth tracking becomes a real feature later, it gets its own purpose statement and field list here — not folded into this one.
